@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<!--
+  Proyecto: Huellitas Web - Sistema de adopción de mascotas y voluntariado
+  Asignatura: Desarrollo Avanzado de Aplicaciones en Red - FESC, VI semestre
+  Equipo: Diego Alejandro Mosquera Caicedo, José Miguel Vera Castillo, Camilo Andres Jaimes Gamboa
+  Entrega 1: primera versión funcional solo en HTML5 (sin CSS ni JavaScript).
+  Entrega 2: componentes reutilizables (js/componentes.js), estilos (css/estilos.css) y
+  consumo de la API REST en Django (js/api.js): catálogo con GET /api/animales/ y
+  solicitud de adopción con POST /api/solicitudes/ y registro de voluntarios con
+  POST /api/voluntarios/. Ver README.md y la carpeta docs/.
+  NOTA: "Fundación Huellitas de Esperanza" es una organización de EJEMPLO (ficticia).
+  Los animales, datos de contacto y jornadas son datos de demostración.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Fundación Huellitas de Esperanza (ejemplo): adopción responsable de perros y gatos rescatados y registro de voluntarios en Cúcuta.">
+  <meta name="author" content="Diego Alejandro Mosquera Caicedo, José Miguel Vera Castillo, Camilo Andres Jaimes Gamboa">
+  <title>Huellitas de Esperanza | Adopción de mascotas y voluntariado</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/estilos.css">
+  <script type="module" src="js/componentes.js"></script>
+  <script type="module" src="js/inicio.js"></script>
+  <script type="module" src="js/voluntarios.js"></script>
+</head>
+<body>
+
+  <!-- ===================== ENCABEZADO Y NAVEGACIÓN (componente) ===================== -->
+  <hh-encabezado pagina="inicio"></hh-encabezado>
+  <noscript>
+    <p class="mensaje mensaje--aviso">Esta página necesita JavaScript para mostrar el menú, los animales y enviar solicitudes.</p>
+  </noscript>
+
+  <main>
+
+    <!-- ===================== INICIO ===================== -->
+    <section id="inicio">
+      <h2>Bienvenido a Huellitas de Esperanza</h2>
+      <p>
+        Somos una fundación sin ánimo de lucro de Cúcuta, Norte de Santander. Desde nuestro refugio
+        rescatamos animales abandonados o maltratados, les damos atención veterinaria, los esterilizamos
+        y los preparamos para encontrar una familia que los quiera para siempre.
+      </p>
+      <p>
+        Con esta página queremos que conocer a nuestros animales, solicitar una adopción o unirse como
+        voluntario sea <strong>fácil, ordenado y transparente</strong>, sin depender solo de mensajes por redes sociales.
+      </p>
+
+      <h3>Nuestro impacto en cifras</h3>
+      <ul>
+        <li><strong>45</strong> animales bajo nuestro cuidado actualmente.</li>
+        <li><strong>320</strong> adopciones responsables realizadas.</li>
+        <li><strong>60</strong> voluntarios activos.</li>
+      </ul>
+      <p><small>Cifras de ejemplo para la demostración del proyecto.</small></p>
+    </section>
+
+    <!-- ===================== CATÁLOGO DE ANIMALES ===================== -->
+    <section id="animales">
+      <h2>Animales en adopción</h2>
+      <p>Cada uno de ellos llega vacunado, desparasitado y esterilizado. Conócelos y elige a tu nuevo compañero.</p>
+
+      <h3>¿Qué significa la raza de cada animal?</h3>
+      <dl>
+        <dt>Raza definida</dt>
+        <dd>El animal tiene las características de una raza reconocida, por ejemplo labrador retriever o beagle.</dd>
+        <dt>Criollo</dt>
+        <dd>El animal no tiene una raza definida y no se le reconocen rasgos de una raza en particular.</dd>
+        <dt>Mestizo</dt>
+        <dd>El animal no tiene una raza definida, pero proviene del cruce de razas y conserva rasgos de alguna de ellas.</dd>
+      </dl>
+
+      <!-- Las tarjetas se generan con los datos de GET /api/animales/ (componente tarjetaAnimal). -->
+      <div class="filtros" role="group" aria-label="Filtrar animales por especie">
+        <button type="button" data-especie="" aria-pressed="true">Todos</button>
+        <button type="button" data-especie="perro" aria-pressed="false">Perros</button>
+        <button type="button" data-especie="gato" aria-pressed="false">Gatos</button>
+      </div>
+      <div id="lista-animales" class="rejilla-animales" aria-live="polite">
+        <p>Cargando animales…</p>
+      </div>
+
+      <h3>Resumen de animales disponibles</h3>
+      <div class="tabla-desplazable">
+        <table>
+          <caption>Animales disponibles para adopción (datos de ejemplo)</caption>
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Especie</th>
+              <th scope="col">Raza</th>
+              <th scope="col">Sexo</th>
+              <th scope="col">Edad</th>
+              <th scope="col">Tamaño</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-animales">
+            <tr><td colspan="7">Cargando…</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="7" id="total-animales"></td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== CÓMO ADOPTAR ===================== -->
+    <section id="como-adoptar">
+      <h2>Cómo adoptar</h2>
+      <p>Adoptar es un compromiso de muchos años. Por eso seguimos un proceso que protege al animal y a la familia.</p>
+
+      <h3>Requisitos</h3>
+      <ul>
+        <li>Ser mayor de 18 años y presentar documento de identidad.</li>
+        <li>Contar con la autorización del propietario si la vivienda es arrendada.</li>
+        <li>Tener tiempo y recursos para alimentación, vacunas y controles veterinarios.</li>
+        <li>Aceptar una visita de seguimiento después de la adopción.</li>
+      </ul>
+
+      <h3>Pasos del proceso</h3>
+      <ol>
+        <li>Diligencia la <a href="#solicitud">solicitud de adopción</a>.</li>
+        <li>Nuestro equipo revisa tu solicitud en un plazo de 3 a 5 días hábiles.</li>
+        <li>Realizamos una entrevista y una visita a tu hogar.</li>
+        <li>Conoces al animal en el refugio.</li>
+        <li>Firmamos el acta de adopción responsable y te llevas a tu nuevo compañero.</li>
+        <li>Hacemos seguimiento durante los primeros 6 meses.</li>
+      </ol>
+
+      <details>
+        <summary>¿La adopción tiene algún costo?</summary>
+        <p>No. Solo pedimos un aporte voluntario que ayuda a cubrir la atención de otros animales rescatados.</p>
+      </details>
+      <details>
+        <summary>¿Puedo adoptar si vivo en apartamento?</summary>
+        <p>Sí. Te ayudaremos a elegir un animal cuyo tamaño y nivel de energía se adapten a tu espacio.</p>
+      </details>
+    </section>
+
+    <!-- ===================== FORMULARIO DE ADOPCIÓN ===================== -->
+    <section id="solicitud">
+      <h2>Solicitud de adopción</h2>
+      <p>Los campos marcados con * son obligatorios.</p>
+
+      <!-- js/inicio.js envía este formulario como JSON a POST /api/solicitudes/ (Django REST Framework).
+           La validación HTML5 es la primera barrera; el servidor vuelve a validar todo. -->
+      <form id="form-solicitud" action="/api/solicitudes/" method="post">
+
+        <fieldset>
+          <legend>Datos personales</legend>
+
+          <p>
+            <label for="nombre">Nombre completo *</label><br>
+            <input type="text" id="nombre" name="nombre" required minlength="3" maxlength="100" placeholder="Ej.: María Fernanda Pérez">
+          </p>
+          <p>
+            <label for="tipo-doc">Tipo de documento *</label><br>
+            <select id="tipo-doc" name="tipo_documento" required>
+              <option value="">Selecciona una opción</option>
+              <option value="CC">Cédula de ciudadanía</option>
+              <option value="CE">Cédula de extranjería</option>
+              <option value="PPT">Permiso por protección temporal</option>
+              <option value="PA">Pasaporte</option>
+            </select>
+          </p>
+          <p>
+            <label for="documento">Número de documento *</label><br>
+            <input type="text" id="documento" name="documento" required pattern="[0-9A-Za-z]{5,15}" title="Entre 5 y 15 caracteres, solo letras y números" inputmode="numeric">
+          </p>
+          <p>
+            <label for="fecha-nac">Fecha de nacimiento *</label><br>
+            <input type="date" id="fecha-nac" name="fecha_nacimiento" required>
+          </p>
+          <p>
+            <label for="correo">Correo electrónico *</label><br>
+            <input type="email" id="correo" name="correo" required placeholder="nombre@correo.com">
+          </p>
+          <p>
+            <label for="telefono">Celular *</label><br>
+            <input type="tel" id="telefono" name="telefono" required pattern="3[0-9]{9}" title="Número celular de 10 dígitos que empieza por 3" placeholder="3001234567">
+          </p>
+          <p>
+            <label for="direccion">Dirección de residencia *</label><br>
+            <input type="text" id="direccion" name="direccion" required placeholder="Calle, número y barrio">
+          </p>
+          <p>
+            <label for="ciudad">Ciudad o municipio *</label><br>
+            <input type="text" id="ciudad" name="ciudad" list="lista-ciudades" required>
+            <datalist id="lista-ciudades">
+              <option value="Cúcuta">
+              <option value="Villa del Rosario">
+              <option value="Los Patios">
+              <option value="El Zulia">
+            </datalist>
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Tu hogar</legend>
+
+          <p>Tipo de vivienda *</p>
+          <p>
+            <input type="radio" id="viv-casa" name="tipo_vivienda" value="casa" required>
+            <label for="viv-casa">Casa</label><br>
+            <input type="radio" id="viv-apto" name="tipo_vivienda" value="apartamento">
+            <label for="viv-apto">Apartamento</label><br>
+            <input type="radio" id="viv-finca" name="tipo_vivienda" value="finca">
+            <label for="viv-finca">Finca</label>
+          </p>
+
+          <p>¿La vivienda es propia o arrendada? *</p>
+          <p>
+            <input type="radio" id="ten-propia" name="tenencia" value="propia" required>
+            <label for="ten-propia">Propia</label><br>
+            <input type="radio" id="ten-arriendo" name="tenencia" value="arrendada">
+            <label for="ten-arriendo">Arrendada (con permiso del propietario)</label>
+          </p>
+
+          <p>
+            <label for="personas">¿Cuántas personas viven en el hogar? *</label><br>
+            <input type="number" id="personas" name="personas_hogar" required min="1" max="20" value="1">
+          </p>
+
+          <p>¿Tienes otras mascotas? (marca las que apliquen)</p>
+          <p>
+            <input type="checkbox" id="masc-perro" name="otras_mascotas" value="perro">
+            <label for="masc-perro">Perro</label><br>
+            <input type="checkbox" id="masc-gato" name="otras_mascotas" value="gato">
+            <label for="masc-gato">Gato</label><br>
+            <input type="checkbox" id="masc-otra" name="otras_mascotas" value="otra">
+            <label for="masc-otra">Otra</label><br>
+            <input type="checkbox" id="masc-ninguna" name="otras_mascotas" value="ninguna">
+            <label for="masc-ninguna">No tengo otras mascotas</label>
+          </p>
+
+          <p>
+            <label for="horas-solo">¿Cuántas horas al día estaría solo el animal? (0 a 12)</label><br>
+            <input type="range" id="horas-solo" name="horas_solo" min="0" max="12" step="1" value="4">
+            <output id="horas-solo-valor" for="horas-solo">4</output> horas
+          </p>
+
+          <p>
+            <label for="foto-vivienda">Foto del espacio donde vivirá el animal (opcional)</label><br>
+            <input type="file" id="foto-vivienda" name="foto_vivienda" accept="image/png, image/jpeg" aria-describedby="foto-nota" disabled>
+            <br><small id="foto-nota">Por ahora no recibimos fotos en línea: las tomamos durante la visita a tu hogar.</small>
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Sobre la adopción</legend>
+
+          <p>
+            <label for="animal">¿A quién quieres adoptar? *</label><br>
+            <!-- Las opciones se cargan desde GET /api/animales/; los que no están disponibles aparecen deshabilitados. -->
+            <select id="animal" name="animal" required>
+              <option value="">Cargando animales…</option>
+              <option value="sin-preferencia">Aún no lo decido, quiero orientación</option>
+            </select>
+          </p>
+
+          <p>
+            <label for="fecha-visita">Fecha preferida para visitar el refugio</label><br>
+            <input type="date" id="fecha-visita" name="fecha_visita">
+          </p>
+          <p>
+            <label for="hora-visita">Hora preferida (8:00 a. m. a 4:00 p. m.)</label><br>
+            <input type="time" id="hora-visita" name="hora_visita" min="08:00" max="16:00">
+          </p>
+
+          <p>
+            <label for="motivo">¿Por qué quieres adoptar? *</label><br>
+            <textarea id="motivo" name="motivo" rows="5" cols="50" required minlength="20" maxlength="1000" placeholder="Cuéntanos sobre ti, tu rutina y por qué quieres darle un hogar a este animal."></textarea>
+          </p>
+
+          <p>
+            <label for="medio">¿Cómo te enteraste de nosotros?</label><br>
+            <select id="medio" name="medio">
+              <option value="redes">Redes sociales</option>
+              <option value="amigo">Un amigo o familiar</option>
+              <option value="jornada">Jornada de adopción</option>
+              <option value="otro">Otro</option>
+            </select>
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Autorizaciones</legend>
+          <p>
+            <input type="checkbox" id="acepta-datos" name="acepta_datos" required>
+            <label for="acepta-datos">
+              Autorizo a la Fundación Huellitas de Esperanza a tratar mis datos personales únicamente para
+              gestionar esta solicitud de adopción, conforme a la Ley 1581 de 2012. *
+            </label>
+          </p>
+          <p>
+            <input type="checkbox" id="acepta-visita" name="acepta_visita" required>
+            <label for="acepta-visita">Acepto la visita previa y el seguimiento posterior a la adopción. *</label>
+          </p>
+        </fieldset>
+
+        <p>
+          <button type="submit">Enviar solicitud</button>
+          <button type="reset">Limpiar formulario</button>
+        </p>
+      </form>
+
+      <!-- Respuesta de la API: éxito (201) o error (400, 404, 409, 500) explicado al usuario. -->
+      <div id="resultado-solicitud" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ===================== VOLUNTARIOS ===================== -->
+    <section id="voluntarios">
+      <h2>Voluntarios</h2>
+      <p>
+        El refugio funciona gracias a personas que donan su tiempo. No necesitas experiencia:
+        te capacitamos en cada actividad.
+      </p>
+
+      <h3>Próximas jornadas</h3>
+      <div class="tabla-desplazable">
+      <table>
+        <caption>Calendario de jornadas de voluntariado (datos de ejemplo)</caption>
+        <thead>
+          <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Horario</th>
+            <th scope="col">Actividad</th>
+            <th scope="col">Lugar</th>
+            <th scope="col">Cupos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><time datetime="2026-10-10">Sábado 10 de octubre</time></td>
+            <td>8:00 a. m. – 12:00 m.</td>
+            <td>Baño y cepillado</td>
+            <td>Refugio</td>
+            <td>10</td>
+          </tr>
+          <tr>
+            <td><time datetime="2026-10-18">Domingo 18 de octubre</time></td>
+            <td>9:00 a. m. – 3:00 p. m.</td>
+            <td>Feria de adopción</td>
+            <td>Parque Santander, Cúcuta</td>
+            <td>15</td>
+          </tr>
+          <tr>
+            <td><time datetime="2026-10-24">Sábado 24 de octubre</time></td>
+            <td>8:00 a. m. – 11:00 a. m.</td>
+            <td>Paseo y socialización</td>
+            <td>Refugio</td>
+            <td>8</td>
+          </tr>
+          <tr>
+            <td><time datetime="2026-11-07">Sábado 7 de noviembre</time></td>
+            <td>7:00 a. m. – 1:00 p. m.</td>
+            <td>Jornada de esterilización</td>
+            <td>Salón comunal, barrio de ejemplo</td>
+            <td>12</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Regístrate como voluntario</h3>
+      <!-- js/voluntarios.js envía este formulario como JSON a POST /api/voluntarios/ -->
+      <form id="form-voluntario" action="/api/voluntarios/" method="post">
+        <fieldset>
+          <legend>Datos del voluntario</legend>
+          <p>
+            <label for="vol-nombre">Nombre completo *</label><br>
+            <input type="text" id="vol-nombre" name="nombre" required minlength="3" maxlength="100">
+          </p>
+          <p>
+            <label for="vol-correo">Correo electrónico *</label><br>
+            <input type="email" id="vol-correo" name="correo" required>
+          </p>
+          <p>
+            <label for="vol-tel">Celular *</label><br>
+            <input type="tel" id="vol-tel" name="telefono" required pattern="3[0-9]{9}" title="Número celular de 10 dígitos que empieza por 3">
+          </p>
+          <p>
+            <label for="vol-edad">Edad *</label><br>
+            <input type="number" id="vol-edad" name="edad" required min="16" max="90">
+          </p>
+          <p>
+            <label for="vol-red">Perfil de red social o portafolio (opcional)</label><br>
+            <input type="url" id="vol-red" name="red_social" placeholder="https://">
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Disponibilidad y habilidades</legend>
+
+          <p>Días disponibles *</p>
+          <p>
+            <input type="checkbox" id="dia-lv" name="disponibilidad" value="entre-semana">
+            <label for="dia-lv">Lunes a viernes</label><br>
+            <input type="checkbox" id="dia-sab" name="disponibilidad" value="sabado">
+            <label for="dia-sab">Sábados</label><br>
+            <input type="checkbox" id="dia-dom" name="disponibilidad" value="domingo">
+            <label for="dia-dom">Domingos y festivos</label>
+          </p>
+
+          <p>
+            <label for="vol-area">Área en la que te gustaría ayudar *</label><br>
+            <select id="vol-area" name="area" required>
+              <option value="">Selecciona un área</option>
+              <option value="cuidado">Cuidado y paseo de animales</option>
+              <option value="eventos">Eventos y ferias de adopción</option>
+              <option value="transporte">Transporte de animales</option>
+              <option value="comunicaciones">Fotografía y redes sociales</option>
+              <option value="hogar-paso">Hogar de paso temporal</option>
+            </select>
+          </p>
+
+          <p>¿Tienes experiencia previa con animales? *</p>
+          <p>
+            <input type="radio" id="exp-si" name="experiencia" value="si" required>
+            <label for="exp-si">Sí</label><br>
+            <input type="radio" id="exp-no" name="experiencia" value="no">
+            <label for="exp-no">No</label>
+          </p>
+
+          <p>
+            <label for="vol-comentarios">Cuéntanos qué te motiva a ser voluntario</label><br>
+            <textarea id="vol-comentarios" name="comentarios" rows="4" cols="50" maxlength="500"></textarea>
+          </p>
+
+          <p>
+            <input type="checkbox" id="vol-datos" name="acepta_datos" required>
+            <label for="vol-datos">Autorizo el tratamiento de mis datos personales solo para coordinar actividades de voluntariado. *</label>
+          </p>
+        </fieldset>
+
+        <p>
+          <button type="submit">Quiero ser voluntario</button>
+        </p>
+      </form>
+
+      <!-- Respuesta de la API: éxito (201) o error (400, 409, 500) explicado al usuario. -->
+      <div id="resultado-voluntario" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ===================== CONTACTO ===================== -->
+    <section id="contacto">
+      <h2>Contacto y ubicación</h2>
+      <p>Visítanos o escríbenos. Con gusto resolvemos tus dudas sobre adopción, voluntariado o donaciones.</p>
+
+      <address>
+        Fundación Huellitas de Esperanza (ejemplo)<br>
+        Dirección: Calle 00 # 00-00, barrio de ejemplo, Cúcuta, Norte de Santander<br>
+        Celular: <a href="tel:+573000000000">300 000 0000</a><br>
+        Correo: <a href="mailto:adopciones@huellitas.example.org">adopciones@huellitas.example.org</a>
+      </address>
+
+      <h3>Horario de atención</h3>
+      <ul>
+        <li>Lunes a viernes: 8:00 a. m. – 4:00 p. m.</li>
+        <li>Sábados: 8:00 a. m. – 12:00 m.</li>
+        <li>Domingos y festivos: solo jornadas programadas.</li>
+      </ul>
+
+      <aside>
+        <h3>Otras formas de ayudar</h3>
+        <p>Si no puedes adoptar, puedes donar alimento, cobijas o medicamentos en nuestra sede, o compartir nuestras publicaciones.</p>
+        <p>
+          Más información sobre tenencia responsable:
+          <a href="https://www.minambiente.gov.co" target="_blank" rel="noopener noreferrer">Ministerio de Ambiente y Desarrollo Sostenible</a>.
+        </p>
+      </aside>
+    </section>
+
+  </main>
+
+  <!-- ===================== PIE DE PÁGINA (componente) ===================== -->
+  <hh-pie></hh-pie>
+
+</body>
+</html>

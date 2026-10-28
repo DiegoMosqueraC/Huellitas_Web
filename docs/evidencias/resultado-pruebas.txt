@@ -1,0 +1,138 @@
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Found 48 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: corsheaders, messages, rest_framework, staticfiles
+  Apply all migrations: admin, adopciones, auth, authtoken, contenttypes, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying adopciones.0001_initial... OK
+  Applying adopciones.0002_animales_iniciales... OK
+  Applying adopciones.0003_voluntario... OK
+  Applying adopciones.0004_cambio_de_estado... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying authtoken.0001_initial... OK
+  Applying authtoken.0002_auto_20160226_1747... OK
+  Applying authtoken.0003_tokenproxy... OK
+  Applying authtoken.0004_alter_tokenproxy_options... OK
+  Applying sessions.0001_initial...test_T01_listar_animales (adopciones.tests.AnimalesApiTests)
+T01 GET /api/animales/ -> 200 con los 6 animales iniciales. ... ok
+test_T02_filtrar_por_especie (adopciones.tests.AnimalesApiTests)
+T02 GET /api/animales/?especie=gato -> 200 solo gatos. ... ok
+test_T03_filtro_invalido (adopciones.tests.AnimalesApiTests)
+T03 GET /api/animales/?especie=loro -> 400 DATOS_INVALIDOS. ... ok
+test_T04_consultar_un_animal (adopciones.tests.AnimalesApiTests)
+T04 GET /api/animales/1/ -> 200 con Luna. ... ok
+test_T05_animal_inexistente (adopciones.tests.AnimalesApiTests)
+T05 GET /api/animales/999/ -> 404 RECURSO_NO_ENCONTRADO. ... ok
+test_T06_crear_sin_token (adopciones.tests.AnimalesApiTests)
+T06 POST /api/animales/ sin token -> 401 NO_AUTENTICADO. ... ok
+test_T07_crear_sin_permiso (adopciones.tests.AnimalesApiTests)
+T07 POST /api/animales/ con token de usuario no administrador -> 403 SIN_PERMISO. ... ok
+test_T08_crear_animal (adopciones.tests.AnimalesApiTests)
+T08 POST /api/animales/ como administrador -> 201 y encabezado Location. ... ok
+test_T09_crear_con_datos_invalidos (adopciones.tests.AnimalesApiTests)
+T09 POST /api/animales/ con edad negativa y especie desconocida -> 400 con detalles por campo. ... ok
+test_T10_actualizar_animal (adopciones.tests.AnimalesApiTests)
+T10 PATCH /api/animales/4/ como administrador -> 200 con el estado actualizado. ... ok
+test_T11_eliminar_animal (adopciones.tests.AnimalesApiTests)
+T11 DELETE /api/animales/6/ -> 204 y luego GET -> 404. ... ok
+test_T12_eliminar_animal_con_solicitudes (adopciones.tests.AnimalesApiTests)
+T12 DELETE de un animal que tiene solicitudes -> 409 CONFLICTO. ... ok
+test_T33_proceso_completo_de_aprobacion (adopciones.tests.CambioDeEstadoApiTests)
+T33 RECIBIDA -> EN_REVISION -> APROBADA (200) y el animal pasa a EN_PROCESO. ... ok
+test_T34_transicion_no_permitida (adopciones.tests.CambioDeEstadoApiTests)
+T34 RECIBIDA -> APROBADA saltándose la revisión -> 409; el animal sigue DISPONIBLE. ... ok
+test_T35_estado_final (adopciones.tests.CambioDeEstadoApiTests)
+T35 Una solicitud RECHAZADA no puede volver a EN_REVISION -> 409. ... ok
+test_T36_rechazo_exige_observacion (adopciones.tests.CambioDeEstadoApiTests)
+T36 Rechazar sin observación -> 400; con observación -> 200 y queda guardada. ... ok
+test_T37_estado_desconocido (adopciones.tests.CambioDeEstadoApiTests)
+T37 PATCH con "estado": "PERDIDA" -> 400 con detalle en estado. ... ok
+test_T38_dos_solicitudes_para_el_mismo_animal (adopciones.tests.CambioDeEstadoApiTests)
+T38 Aprobada una solicitud de Luna, aprobar otra para Luna -> 409 y la segunda queda EN_REVISION. ... ok
+test_T39_aprobar_sin_animal_asignado (adopciones.tests.CambioDeEstadoApiTests)
+T39 Aprobar una solicitud "sin preferencia" (sin animal) -> 409. ... ok
+test_T40_cambiar_estado_requiere_admin (adopciones.tests.CambioDeEstadoApiTests)
+T40 PATCH de solicitud o voluntario sin token -> 401; como voluntario -> 403; inexistente -> 404. ... ok
+test_T41_activar_voluntario (adopciones.tests.CambioDeEstadoApiTests)
+T41 Voluntario PENDIENTE -> ACTIVO (200); ACTIVO -> PENDIENTE (409). ... ok
+test_T42_admin_de_django_usa_el_mismo_servicio (adopciones.tests.CambioDeEstadoApiTests)
+T42 La acción "Aprobar" del panel /admin/ respeta las mismas reglas que la API. ... ok
+test_T43_iniciar_sesion (adopciones.tests.SesionApiTests)
+T43 Credenciales correctas de administrador -> 200 con token que sirve para consultar solicitudes. ... ok
+test_T44_credenciales_incorrectas (adopciones.tests.SesionApiTests)
+T44 Contraseña o usuario incorrectos -> 401 con el mismo mensaje en ambos casos; sin campos -> 400. ... ok
+test_T45_usuario_no_administrador (adopciones.tests.SesionApiTests)
+T45 Un usuario que no es administrador inicia sesión (es_administrador false) pero recibe 403 en las solicitudes. ... ok
+test_T46_cerrar_sesion_invalida_el_token (adopciones.tests.SesionApiTests)
+T46 DELETE /api/sesion/ -> 204; el mismo token después -> 401. Sin token -> 401. ... ok
+test_T47_limite_de_intentos (adopciones.tests.SesionApiTests)
+T47 Más de 10 intentos por minuto desde la misma IP -> 429 DEMASIADOS_INTENTOS, aunque la clave sea correcta. ... ok
+test_T48_estados_siguientes (adopciones.tests.SesionApiTests)
+T48 El detalle trae los estados a los que se puede pasar, tomados de la regla del servicio. ... ok
+test_T13_registrar_solicitud (adopciones.tests.SolicitudesApiTests)
+T13 POST /api/solicitudes/ válida -> 201 con id, estado RECIBIDA y animal. ... ok
+test_T14_formato_invalido (adopciones.tests.SolicitudesApiTests)
+T14 POST con celular, correo y motivo inválidos -> 400 con un detalle por campo, sin llegar a la BD. ... ok
+test_T15_menor_de_edad (adopciones.tests.SolicitudesApiTests)
+T15 POST de un menor de 18 años -> 400 (regla de negocio del servicio). ... ok
+test_T16_sin_autorizaciones (adopciones.tests.SolicitudesApiTests)
+T16 POST sin aceptar el tratamiento de datos ni la visita -> 400. ... ok
+test_T17_animal_inexistente (adopciones.tests.SolicitudesApiTests)
+T17 POST para un animal que no existe -> 404. ... ok
+test_T18_animal_no_disponible (adopciones.tests.SolicitudesApiTests)
+T18 POST para Zeus (en proceso de adopción) -> 409 CONFLICTO. ... ok
+test_T19_solicitud_duplicada (adopciones.tests.SolicitudesApiTests)
+T19 Segunda solicitud activa del mismo documento para el mismo animal -> 409. ... ok
+test_T20_cliente_no_decide_el_estado (adopciones.tests.SolicitudesApiTests)
+T20 Integridad: si el cliente envía "estado": "APROBADA", el servidor lo ignora -> RECIBIDA. ... ok
+test_T21_json_mal_formado (adopciones.tests.SolicitudesApiTests)
+T21 POST con un cuerpo que no es JSON válido -> 400 JSON_INVALIDO. ... ok
+test_T22_consultar_solicitudes_requiere_admin (adopciones.tests.SolicitudesApiTests)
+T22 GET /api/solicitudes/: sin token 401, voluntario 403, administrador 200. ... ok
+test_T23_error_inesperado_controlado (adopciones.tests.SolicitudesApiTests)
+T23 Falla de la base de datos -> 500 ERROR_INTERNO sin exponer detalles internos. ... ok
+test_T24_endpoint_inexistente (adopciones.tests.SolicitudesApiTests)
+T24 GET /api/mascotas/ (no existe) -> 404 en JSON, no una página HTML. ... ok
+test_T25_registrar_voluntario (adopciones.tests.VoluntariosApiTests)
+T25 POST /api/voluntarios/ válido -> 201 con estado PENDIENTE y Location. ... ok
+test_T26_formato_invalido (adopciones.tests.VoluntariosApiTests)
+T26 POST sin días disponibles, con celular y edad inválidos -> 400 con detalles; nada se guarda. ... ok
+test_T27_menor_en_area_de_adultos (adopciones.tests.VoluntariosApiTests)
+T27 Voluntario de 16 años en hogar de paso -> 400 (regla de negocio); en eventos -> 201. ... ok
+test_T28_sin_autorizacion_de_datos (adopciones.tests.VoluntariosApiTests)
+T28 POST sin autorizar el tratamiento de datos -> 400. ... ok
+test_T29_correo_duplicado (adopciones.tests.VoluntariosApiTests)
+T29 Segundo registro con el mismo correo (con mayúsculas) -> 409. ... ok
+test_T30_cliente_no_decide_el_estado (adopciones.tests.VoluntariosApiTests)
+T30 Integridad: "estado": "ACTIVO" enviado por el cliente se ignora -> PENDIENTE. ... ok
+test_T31_consultar_voluntarios_requiere_admin (adopciones.tests.VoluntariosApiTests)
+T31 GET /api/voluntarios/: sin token 401, voluntario 403, administrador 200. ... ok
+test_T32_voluntario_inexistente (adopciones.tests.VoluntariosApiTests)
+T32 GET /api/voluntarios/999/ como administrador -> 404. ... ok
+
+----------------------------------------------------------------------
+Ran 48 tests in 125.733s
+
+OK
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+ OK
+System check identified no issues (0 silenced).

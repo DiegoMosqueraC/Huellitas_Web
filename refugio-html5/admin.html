@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!--
+  Proyecto: Huellitas Web - Panel de administración de la fundación.
+  Inicia sesión con POST /api/sesion/ y gestiona el proceso de adopción y los
+  voluntarios con GET y PATCH /api/solicitudes/ y /api/voluntarios/ (js/admin.js).
+  Los botones de cada fila salen de "estados_siguientes", que calcula el servidor:
+  la regla de qué estado sigue a cuál vive solo en el backend.
+  NOTA: organización y datos de EJEMPLO con fines académicos.
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Diego Alejandro Mosquera Caicedo, José Miguel Vera Castillo, Camilo Andres Jaimes Gamboa">
+  <title>Administración | Huellitas de Esperanza</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/estilos.css">
+  <script type="module" src="js/componentes.js"></script>
+  <script type="module" src="js/admin.js"></script>
+</head>
+<body>
+
+  <hh-encabezado pagina="admin"></hh-encabezado>
+  <noscript>
+    <p class="mensaje mensaje--aviso">El panel de administración necesita JavaScript.</p>
+  </noscript>
+
+  <main>
+
+    <!-- ===================== INICIO DE SESIÓN ===================== -->
+    <section id="acceso" hidden>
+      <h1>Administración</h1>
+      <p>Acceso solo para el personal de la fundación.</p>
+      <form id="form-acceso" class="form-acceso">
+        <fieldset>
+          <legend>Iniciar sesión</legend>
+          <p>
+            <label for="usuario">Usuario</label><br>
+            <input type="text" id="usuario" name="usuario" required autocomplete="username" maxlength="150">
+          </p>
+          <p>
+            <label for="clave">Contraseña</label><br>
+            <input type="password" id="clave" name="clave" required autocomplete="current-password" maxlength="128">
+          </p>
+          <p><button type="submit">Entrar</button></p>
+        </fieldset>
+      </form>
+      <div id="resultado-acceso" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- ===================== PANEL ===================== -->
+    <section id="panel" hidden>
+      <div class="panel-barra">
+        <h1>Panel de administración</h1>
+        <p>
+          Sesión: <strong id="usuario-actual"></strong>
+          <button type="button" id="boton-actualizar" class="boton-secundario">Actualizar</button>
+          <button type="button" id="boton-salir" class="boton-secundario">Cerrar sesión</button>
+        </p>
+      </div>
+
+      <div class="filtros" role="group" aria-label="Elegir qué gestionar">
+        <button type="button" data-vista="vista-solicitudes" aria-pressed="true">Solicitudes de adopción <span id="contador-solicitudes"></span></button>
+        <button type="button" data-vista="vista-voluntarios" aria-pressed="false">Voluntarios <span id="contador-voluntarios"></span></button>
+      </div>
+
+      <div id="aviso-panel" role="status" aria-live="polite"></div>
+
+      <section id="vista-solicitudes" aria-labelledby="titulo-solicitudes">
+        <h2 id="titulo-solicitudes">Solicitudes de adopción</h2>
+        <p>
+          <label for="filtro-solicitudes">Mostrar</label>
+          <select id="filtro-solicitudes">
+            <option value="">Todas</option>
+            <option value="RECIBIDA">Recibidas</option>
+            <option value="EN_REVISION">En revisión</option>
+            <option value="APROBADA">Aprobadas</option>
+            <option value="RECHAZADA">Rechazadas</option>
+          </select>
+        </p>
+        <div class="tabla-desplazable">
+          <table>
+            <caption>Solicitudes, de la más reciente a la más antigua</caption>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Solicitante</th>
+                <th scope="col">Animal</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-solicitudes"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="vista-voluntarios" aria-labelledby="titulo-voluntarios" hidden>
+        <h2 id="titulo-voluntarios">Voluntarios</h2>
+        <p>
+          <label for="filtro-voluntarios">Mostrar</label>
+          <select id="filtro-voluntarios">
+            <option value="">Todos</option>
+            <option value="PENDIENTE">Pendientes de inducción</option>
+            <option value="ACTIVO">Activos</option>
+            <option value="INACTIVO">Inactivos</option>
+          </select>
+        </p>
+        <div class="tabla-desplazable">
+          <table>
+            <caption>Voluntarios registrados</caption>
+            <thead>
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Contacto</th>
+                <th scope="col">Edad</th>
+                <th scope="col">Área</th>
+                <th scope="col">Días</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-voluntarios"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- Detalle de una solicitud -->
+    <dialog id="dialogo-detalle" aria-labelledby="titulo-detalle">
+      <h2 id="titulo-detalle">Solicitud</h2>
+      <dl id="contenido-detalle" class="ficha"></dl>
+      <form method="dialog"><button type="submit" class="boton-secundario">Cerrar</button></form>
+    </dialog>
+
+    <!-- Rechazo: la observación es obligatoria (regla del servicio) -->
+    <dialog id="dialogo-rechazo" aria-labelledby="titulo-rechazo">
+      <form id="form-rechazo">
+        <h2 id="titulo-rechazo">Rechazar solicitud</h2>
+        <p>
+          <label for="observacion">Motivo del rechazo (se le comunicará al solicitante) *</label><br>
+          <textarea id="observacion" name="observacion" rows="4" cols="40" required maxlength="500"></textarea>
+        </p>
+        <div id="resultado-rechazo" role="status" aria-live="polite"></div>
+        <p class="acciones-dialogo">
+          <button type="button" id="cancelar-rechazo" class="boton-secundario">Cancelar</button>
+          <button type="submit" class="boton-peligro">Rechazar</button>
+        </p>
+      </form>
+    </dialog>
+
+  </main>
+
+  <hh-pie></hh-pie>
+
+</body>
+</html>

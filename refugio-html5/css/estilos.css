@@ -1,0 +1,621 @@
+/*
+  Estilos de Huellitas Web.
+  Los colores y medidas se definen una sola vez como variables: cambiar el
+  color del menú es cambiar una línea, no 40 pantallas.
+*/
+
+:root {
+  --color-primario: #b45309;
+  --color-primario-oscuro: #8a3c06;
+  --color-acento: #0f766e;
+  --fondo: #fdf8f3;
+  --superficie: #ffffff;
+  --texto: #1f2937;
+  --texto-suave: #4b5563;
+  --borde: #e8d9c8;
+  --exito-texto: #14532d;
+  --exito-fondo: #dcfce7;
+  --aviso-texto: #78350f;
+  --aviso-fondo: #fef3c7;
+  --error-texto: #7f1d1d;
+  --error-fondo: #fee2e2;
+  --radio: 12px;
+  --sombra: 0 2px 10px rgba(60, 40, 20, 0.08);
+  --ancho-maximo: 1100px;
+  --fuente: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--color-acento);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: 1.75rem;
+  color: var(--color-primario-oscuro);
+}
+
+/* ---------- Componente: encabezado ---------- */
+
+hh-encabezado,
+hh-pie {
+  display: block;
+}
+
+.encabezado {
+  background: var(--superficie);
+  border-bottom: 4px solid var(--color-primario);
+  padding: 1rem;
+}
+
+.encabezado__marca {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  max-width: var(--ancho-maximo);
+  margin: 0 auto;
+}
+
+.encabezado__marca h1,
+.encabezado__marca .marca {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primario-oscuro);
+}
+
+.encabezado__marca .marca a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.encabezado__lema {
+  margin: 0.25rem 0 0;
+  color: var(--texto-suave);
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  max-width: var(--ancho-maximo);
+  margin: 0.75rem auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu a {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  color: var(--texto);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.menu a:hover {
+  background: var(--aviso-fondo);
+  color: var(--color-primario-oscuro);
+}
+
+.aviso-demo {
+  max-width: var(--ancho-maximo);
+  margin: 0.5rem auto 0;
+  color: var(--texto-suave);
+}
+
+/* ---------- Contenido ---------- */
+
+main {
+  max-width: var(--ancho-maximo);
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+}
+
+main > section {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+main > section:last-child {
+  border-bottom: 0;
+}
+
+dl dt {
+  font-weight: 700;
+}
+
+dl dd {
+  margin: 0 0 0.5rem;
+}
+
+details {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+aside {
+  background: var(--superficie);
+  border-left: 4px solid var(--color-acento);
+  border-radius: var(--radio);
+  padding: 0.5rem 1rem;
+}
+
+/* ---------- Catálogo de animales ---------- */
+
+.filtros {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.filtros button {
+  border: 2px solid var(--color-primario);
+  background: var(--superficie);
+  color: var(--color-primario-oscuro);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filtros button[aria-pressed="true"] {
+  background: var(--color-primario);
+  color: #fff;
+}
+
+.rejilla-animales {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+.rejilla-animales[aria-busy="true"] {
+  opacity: 0.5;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.tarjeta img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.tarjeta__cuerpo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0 1rem 1rem;
+}
+
+.tarjeta__cuerpo h3 {
+  margin: 0.75rem 0 0.25rem;
+}
+
+.tarjeta__datos {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.tarjeta__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.boton,
+button[type="submit"] {
+  display: inline-block;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  background: var(--color-primario);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.boton:hover,
+button[type="submit"]:hover {
+  background: var(--color-primario-oscuro);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button[type="reset"] {
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  background: var(--superficie);
+  font: inherit;
+  cursor: pointer;
+}
+
+.etiqueta {
+  display: inline-block;
+  margin: 0;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.etiqueta--aviso {
+  background: var(--aviso-fondo);
+  color: var(--aviso-texto);
+}
+
+/* ---------- Tablas ---------- */
+
+.tabla-desplazable {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--superficie);
+  border-radius: var(--radio);
+  overflow: hidden;
+  box-shadow: var(--sombra);
+}
+
+caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 0;
+  color: var(--texto-suave);
+}
+
+th,
+td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+
+thead th {
+  background: var(--color-primario);
+  color: #fff;
+}
+
+tfoot td {
+  font-weight: 600;
+}
+
+/* ---------- Formularios ---------- */
+
+form {
+  max-width: 720px;
+}
+
+fieldset {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 0.5rem 1.25rem 1rem;
+  margin: 0 0 1.25rem;
+}
+
+legend {
+  padding: 0 0.5rem;
+  font-weight: 700;
+  color: var(--color-primario-oscuro);
+}
+
+label {
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #c9b8a6;
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+}
+
+input[type="range"] {
+  width: min(320px, 70%);
+  vertical-align: middle;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border: 2px solid var(--error-texto);
+  background: var(--error-fondo);
+}
+
+/* ---------- Mensajes ---------- */
+
+.mensaje {
+  border-radius: var(--radio);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.mensaje p {
+  margin: 0;
+}
+
+.mensaje ul {
+  margin: 0.5rem 0 0;
+}
+
+.mensaje--exito {
+  background: var(--exito-fondo);
+  color: var(--exito-texto);
+}
+
+.mensaje--aviso {
+  background: var(--aviso-fondo);
+  color: var(--aviso-texto);
+}
+
+.mensaje--error {
+  background: var(--error-fondo);
+  color: var(--error-texto);
+}
+
+/* ---------- Detalle de un animal ---------- */
+
+.detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+  padding-top: 1.5rem;
+}
+
+.detalle figure {
+  margin: 0;
+}
+
+.detalle img {
+  width: 100%;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.detalle figcaption {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.detalle h1 {
+  margin-top: 0;
+  color: var(--color-primario-oscuro);
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+}
+
+.ficha dd {
+  margin: 0;
+}
+
+/* ---------- Panel de administración ---------- */
+
+.form-acceso {
+  max-width: 420px;
+}
+
+.panel-barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+}
+
+.panel-barra h1 {
+  margin: 0;
+  color: var(--color-primario-oscuro);
+}
+
+.boton-secundario,
+.accion {
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-secundario:hover,
+.accion:hover {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+
+.accion {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+
+.accion--neutra {
+  border-color: var(--borde);
+  color: var(--texto);
+}
+
+.accion--peligro,
+.boton-peligro {
+  border-color: var(--error-texto);
+  color: var(--error-texto);
+}
+
+.boton-peligro {
+  border: 1px solid var(--error-texto);
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  background: var(--error-fondo);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.celda-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.estado {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--aviso-fondo);
+  color: var(--aviso-texto);
+}
+
+.estado--aprobada,
+.estado--activo {
+  background: var(--exito-fondo);
+  color: var(--exito-texto);
+}
+
+.estado--rechazada,
+.estado--inactivo {
+  background: var(--error-fondo);
+  color: var(--error-texto);
+}
+
+.estado--en_revision {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+dialog {
+  width: min(560px, calc(100% - 2rem));
+  border: 0;
+  border-radius: var(--radio);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+dialog::backdrop {
+  background: rgba(30, 20, 10, 0.45);
+}
+
+dialog h2 {
+  margin-top: 0;
+}
+
+dialog textarea {
+  width: 100%;
+}
+
+.acciones-dialogo {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* ---------- Componente: pie de página ---------- */
+
+.pie {
+  background: #3b2a1a;
+  color: #f5ebe0;
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.pie a {
+  color: #fcd34d;
+}
+
+/* ---------- Pantallas pequeñas ---------- */
+
+@media (max-width: 700px) {
+  .encabezado__marca {
+    align-items: flex-start;
+  }
+
+  .encabezado__marca img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .detalle {
+    grid-template-columns: 1fr;
+  }
+}
