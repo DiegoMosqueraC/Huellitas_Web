@@ -5,15 +5,15 @@
   de error que define el contrato de la API.
 */
 
-// Con Django la página y la API comparten origen. Con Live Server (puerto 5500)
-// la API sigue en el puerto 8000.
-const BASE_API = location.port === '5500' ? 'http://127.0.0.1:8000/api' : '/api';
+// Con Django la página y la API comparten origen. Si la página se abre con doble clic
+// (file://) o con Live Server (puerto 5500), la API sigue en el puerto 8000.
+const BASE_API = location.protocol === 'file:' || location.port === '5500' ? 'http://127.0.0.1:8000/api' : '/api';
 
 /* Sesión del administrador. Se guarda en sessionStorage (se borra al cerrar la
    pestaña) y no en localStorage, para que el token no quede guardado en el equipo. */
 const CLAVE_SESION = 'huellitas.sesion';
 
-export const sesion = {
+const sesion = {
   obtener() {
     try {
       return JSON.parse(sessionStorage.getItem(CLAVE_SESION));
@@ -37,7 +37,7 @@ export const sesion = {
   },
 };
 
-export class ErrorApi extends Error {
+class ErrorApi extends Error {
   constructor(estado, codigo, mensaje, detalles = null) {
     super(mensaje);
     this.estado = estado;
@@ -61,7 +61,7 @@ async function solicitar(metodo, ruta, cuerpo, { autenticado = false } = {}) {
   try {
     respuesta = await fetch(BASE_API + ruta, opciones);
   } catch {
-    throw new ErrorApi(0, 'SIN_CONEXION', 'No fue posible conectar con el servidor. Verifica que la API esté encendida.');
+    throw new ErrorApi(0, 'SIN_CONEXION', 'No fue posible conectar con el servidor. Enciéndelo con "python manage.py runserver" en la carpeta backend y recarga la página.');
   }
 
   if (respuesta.status === 204) return null;
@@ -81,7 +81,7 @@ async function solicitar(metodo, ruta, cuerpo, { autenticado = false } = {}) {
 
 const ADMIN = { autenticado: true };
 
-export const api = {
+const api = {
   listarAnimales: (especie) =>
     solicitar('GET', '/animales/' + (especie ? `?especie=${encodeURIComponent(especie)}` : '')),
   obtenerAnimal: (id) => solicitar('GET', `/animales/${encodeURIComponent(id)}/`),

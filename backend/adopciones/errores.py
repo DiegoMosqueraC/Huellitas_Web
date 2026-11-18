@@ -19,6 +19,7 @@ Los errores también se diseñan.
 """
 import logging
 
+from django.db import IntegrityError, InterfaceError, OperationalError
 from django.http import Http404
 from django.utils import timezone
 from rest_framework import exceptions, status
@@ -110,6 +111,35 @@ def manejador_de_errores(exc, context):
                 break
         detalles = respuesta.data if isinstance(exc, exceptions.ValidationError) else None
         respuesta.data = cuerpo_de_error(respuesta.status_code, codigo, mensaje, detalles, ruta)
+        return respuesta
+
+    # La base de datos rechazó el registro por una restricción (UNIQUE, CHECK, FK).
+    # Es la última barrera: ocurre si dos peticiones simultáneas pasan la validación
+    # del servicio al mismo tiempo.
+    if isinstance(exc, IntegrityError):
+        logger.warning('Restricción de la base de datos en %s: %s', ruta, exc)
+        return Response(
+            cuerpo_de_error(
+                status.HTTP_409_CONFLICT, 'CONFLICTO',
+                'El registro entra en conflicto con otro que ya existe. Actualiza la página e inténtalo de nuevo.',
+                None, ruta,
+            ),
+            status=status.HTTP_409_CONFLICT,
+        )
+
+    # La fuente de datos no responde (motor caído, archivo bloqueado, red).
+    # 503 le dice al cliente que el problema es temporal y cuándo reintentar.
+    if isinstance(exc, (OperationalError, InterfaceError)):
+        logger.exception('Base de datos no disponible en %s %s', request.method if request else '', ruta)
+        respuesta = Response(
+            cuerpo_de_error(
+                status.HTTP_503_SERVICE_UNAVAILABLE, 'SERVICIO_NO_DISPONIBLE',
+                'El servicio no está disponible en este momento. Intenta de nuevo en unos minutos.',
+                None, ruta,
+            ),
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+        respuesta['Retry-After'] = '30'
         return respuesta
 
     # Error inesperado: se registra para trazabilidad, pero al cliente no se

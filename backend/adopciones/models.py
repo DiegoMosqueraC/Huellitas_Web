@@ -6,6 +6,7 @@ No sabe nada de HTTP, de JSON ni de pantallas; solo describe los datos
 y sus valores permitidos.
 """
 from django.db import models
+from django.db.models import Q
 
 
 class Animal(models.Model):
@@ -45,6 +46,9 @@ class Animal(models.Model):
     class Meta:
         ordering = ['id']
         verbose_name_plural = 'animales'
+        constraints = [
+            models.CheckConstraint(condition=Q(edad_meses__lte=360), name='animal_edad_maxima'),
+        ]
 
     def __str__(self):
         return f'{self.nombre} ({self.get_especie_display()})'
@@ -107,6 +111,22 @@ class SolicitudAdopcion(models.Model):
         ordering = ['-fecha_creacion']
         verbose_name = 'solicitud de adopción'
         verbose_name_plural = 'solicitudes de adopción'
+        # Las mismas reglas del servicio, repetidas en la base de datos: aunque
+        # alguien escriba sin pasar por la API, los datos no quedan inconsistentes.
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(personas_hogar__gte=1, personas_hogar__lte=20), name='solicitud_personas_hogar_rango'
+            ),
+            models.CheckConstraint(condition=Q(horas_solo__lte=12), name='solicitud_horas_solo_maximo'),
+            models.CheckConstraint(
+                condition=Q(acepta_datos=True, acepta_visita=True), name='solicitud_con_autorizaciones'
+            ),
+            models.UniqueConstraint(
+                fields=['documento', 'animal'],
+                condition=Q(estado__in=['RECIBIDA', 'EN_REVISION']),
+                name='solicitud_activa_unica',
+            ),
+        ]
 
     def __str__(self):
         animal = self.animal.nombre if self.animal else 'sin preferencia'
@@ -145,6 +165,10 @@ class Voluntario(models.Model):
     class Meta:
         ordering = ['-fecha_registro']
         verbose_name_plural = 'voluntarios'
+        constraints = [
+            models.CheckConstraint(condition=Q(edad__gte=16, edad__lte=90), name='voluntario_edad_rango'),
+            models.CheckConstraint(condition=Q(acepta_datos=True), name='voluntario_con_autorizacion'),
+        ]
 
     def __str__(self):
         return f'{self.nombre} ({self.get_area_display()})'

@@ -1,5 +1,5 @@
 Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
-Found 48 test(s).
+Found 53 test(s).
 Operations to perform:
   Synchronize unmigrated apps: corsheaders, messages, rest_framework, staticfiles
   Apply all migrations: admin, adopciones, auth, authtoken, contenttypes, sessions
@@ -16,6 +16,7 @@ Running migrations:
   Applying adopciones.0002_animales_iniciales... OK
   Applying adopciones.0003_voluntario... OK
   Applying adopciones.0004_cambio_de_estado... OK
+  Applying adopciones.0005_restricciones_de_integridad... OK
   Applying contenttypes.0002_remove_content_type_name... OK
   Applying auth.0002_alter_permission_name_max_length... OK
   Applying auth.0003_alter_user_email_max_length... OK
@@ -76,6 +77,16 @@ test_T41_activar_voluntario (adopciones.tests.CambioDeEstadoApiTests)
 T41 Voluntario PENDIENTE -> ACTIVO (200); ACTIVO -> PENDIENTE (409). ... ok
 test_T42_admin_de_django_usa_el_mismo_servicio (adopciones.tests.CambioDeEstadoApiTests)
 T42 La acción "Aprobar" del panel /admin/ respeta las mismas reglas que la API. ... ok
+test_T49_base_de_datos_no_disponible (adopciones.tests.PersistenciaEIntegridadTests)
+T49 Si la base de datos no responde -> 503 SERVICIO_NO_DISPONIBLE con Retry-After, sin detalles internos. ... ok
+test_T50_la_aprobacion_es_atomica (adopciones.tests.PersistenciaEIntegridadTests)
+T50 Si falla guardar la solicitud al aprobar, el animal NO queda EN_PROCESO (rollback de la transacción). ... ok
+test_T51_la_base_de_datos_rechaza_datos_invalidos (adopciones.tests.PersistenciaEIntegridadTests)
+T51 Aunque se escriba sin pasar por la API, las restricciones CHECK y UNIQUE de la BD rechazan el registro. ... ok
+test_T52_conflicto_detectado_por_la_base_de_datos (adopciones.tests.PersistenciaEIntegridadTests)
+T52 Dos registros simultáneos con el mismo correo: el servicio no lo ve, la BD sí -> 409 controlado, no 500. ... ok
+test_T53_lo_que_se_guarda_es_lo_que_se_consulta (adopciones.tests.PersistenciaEIntegridadTests)
+T53 Consistencia entre operaciones: POST -> GET lista -> GET detalle -> PATCH -> GET devuelven el mismo registro. ... ok
 test_T43_iniciar_sesion (adopciones.tests.SesionApiTests)
 T43 Credenciales correctas de administrador -> 200 con token que sirve para consultar solicitudes. ... ok
 test_T44_credenciales_incorrectas (adopciones.tests.SesionApiTests)
@@ -130,7 +141,7 @@ test_T32_voluntario_inexistente (adopciones.tests.VoluntariosApiTests)
 T32 GET /api/voluntarios/999/ como administrador -> 404. ... ok
 
 ----------------------------------------------------------------------
-Ran 48 tests in 125.733s
+Ran 53 tests in 88.637s
 
 OK
 Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

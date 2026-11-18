@@ -114,7 +114,9 @@ El cliente puede saber si funcionó (201), qué se creó, cuál es el id, cuál 
 | 400 | `DATOS_INVALIDOS` | Formato incorrecto o regla del solicitante incumplida (edad, autorizaciones, horario) |
 | 404 | `RECURSO_NO_ENCONTRADO` | El animal no existe |
 | 409 | `CONFLICTO` | El animal no está disponible o ya existe una solicitud activa |
+| 409 | `CONFLICTO` | La base de datos rechaza el registro por una restricción UNIQUE o CHECK (por ejemplo, dos envíos simultáneos) |
 | 500 | `ERROR_INTERNO` | Falla inesperada (se registra en el log; al cliente no se le muestran detalles internos) |
+| 503 | `SERVICIO_NO_DISPONIBLE` | La base de datos no responde. Incluye el encabezado `Retry-After: 30` |
 
 **SEGURIDAD: ¿quién puede usarlo?** Cualquier visitante puede **enviar** una solicitud. Solo un administrador puede **consultar** las solicitudes, porque contienen datos personales.
 
@@ -299,6 +301,34 @@ Todos los errores de la API, incluidos los del framework y los 500, tienen la mi
 - `mensaje`: texto para mostrar al usuario.
 - `detalles`: errores por campo (`{"telefono": ["..."]}`), útil para marcar el formulario.
 - `ruta` y `fecha`: trazabilidad.
+
+## 4.3.1 Persistencia e integridad en la fuente de datos (Unidad 3, clase 2)
+
+La API no simula el almacenamiento: cada operación escribe en la base de datos SQLite (`backend/db.sqlite3`) mediante el ORM de Django, y la prueba `backend/verificar_persistencia.py` demuestra que un registro sigue ahí después de apagar y encender el servicio (ver `05-pruebas.md`, sección 5.6).
+
+Los datos se validan en tres niveles:
+
+| Nivel | Qué controla | Dónde |
+|---|---|---|
+| Frontend | Campos obligatorios, formatos y rangos visibles | Atributos HTML5 de `index.html` |
+| Backend | Formato (serializers) y reglas del negocio (servicios) | `serializers.py`, `servicios.py` |
+| Base de datos | PK, FK, NOT NULL, CHECK y UNIQUE | `models.py`, migración `0005_restricciones_de_integridad` |
+
+Restricciones declaradas en la base de datos (rechazan el dato aunque alguien escriba sin pasar por la API):
+
+| Tabla | Restricción | Regla |
+|---|---|---|
+| `adopciones_animal` | `animal_edad_maxima` (CHECK) | `edad_meses` ≤ 360 |
+| `adopciones_solicitudadopcion` | `solicitud_personas_hogar_rango` (CHECK) | `personas_hogar` entre 1 y 20 |
+| `adopciones_solicitudadopcion` | `solicitud_horas_solo_maximo` (CHECK) | `horas_solo` ≤ 12 |
+| `adopciones_solicitudadopcion` | `solicitud_con_autorizaciones` (CHECK) | `acepta_datos` y `acepta_visita` verdaderos |
+| `adopciones_solicitudadopcion` | `solicitud_activa_unica` (UNIQUE parcial) | Un documento no puede tener dos solicitudes RECIBIDA o EN_REVISION para el mismo animal |
+| `adopciones_voluntario` | `voluntario_edad_rango` (CHECK) | `edad` entre 16 y 90 |
+| `adopciones_voluntario` | `voluntario_con_autorizacion` (CHECK) | `acepta_datos` verdadero |
+
+Si la base de datos rechaza un registro por una de estas restricciones, la API responde **409 `CONFLICTO`**; si la base de datos no responde, **503 `SERVICIO_NO_DISPONIBLE`** con `Retry-After`. Aprobar una solicitud cambia dos tablas (la solicitud y el animal) dentro de `transaction.atomic`: si algo falla, se revierten ambos cambios (prueba T50).
+
+El documento técnico del taller, con el recorrido de los datos, el código de cada capa y las evidencias, está en [`Taller_Integracion_Equipo_HuellitasWeb.pdf`](Taller_Integracion_Equipo_HuellitasWeb.pdf) (versión editable en `.docx`).
 
 ## 4.4 Actividad 2: Desarme el controlador
 

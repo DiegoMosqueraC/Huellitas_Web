@@ -19,9 +19,10 @@ Fecha de corte: 27/10/2026.
 | Endpoints | 🟢 | Animales (CRUD), solicitudes y voluntarios (registro, consulta y cambio de estado con PATCH) |
 | Gestión del proceso de adopción | 🟢 | Pantalla `admin.html` con inicio de sesión, solicitudes y voluntarios; usa los PATCH de la API. También está el panel `/admin/` de Django con las mismas reglas |
 | Backend | 🟢 | Django + DRF con Controller → Service → Repository |
-| Datos | 🟡 | SQLite con datos iniciales por migración; las fotos son rutas fijas del frontend |
+| Datos y persistencia | 🟢 | SQLite con restricciones CHECK y UNIQUE en la base de datos; persistencia comprobada después de reiniciar el servicio (`verificar_persistencia.py`) |
+| Fuente de datos para producción | 🟡 | Falta el cambio a PostgreSQL; las fotos son rutas fijas del frontend |
 | Seguridad | 🟡 | Token Bearer con cierre de sesión que lo invalida, permisos 401/403, límite de 10 intentos de inicio de sesión por minuto, validación e integridad. Faltan HTTPS y llave secreta por variable de entorno en producción |
-| Pruebas | 🟢 | 48 pruebas automáticas (todas PASS) + pruebas manuales y por HTTP |
+| Pruebas | 🟢 | 53 pruebas automáticas (todas PASS), prueba de persistencia tras reinicio, pruebas manuales y por HTTP |
 | Documentación | 🟢 | Carpeta `docs/` y `README.md` |
 | Arquitectura | 🟢 | Componentes, capas y MVC documentados y aplicados |
 
@@ -37,10 +38,11 @@ Fecha de corte: 27/10/2026.
 4. 🟡 **Fotos:** guardar las fotos de los animales y de la vivienda como archivos del backend (`ImageField` + carpeta `media/`) en lugar de rutas fijas. Por ahora el campo de foto del formulario está deshabilitado.
 5. 🟡 **Reto del cambio:** cuentas de solicitante y "Mis solicitudes" (ver 4.8).
 6. 🟡 **Despliegue seguro:** `DJANGO_DEBUG=0`, `DJANGO_SECRET_KEY` propia, HTTPS y servir el frontend con un servidor web (no con Django).
-7. **Próxima clase (persistencia + integración real):** decidir el motor de base de datos definitivo. Gracias a los repositorios, el cambio se limita a `settings.py` y a `repositorios.py`.
+7. ✅ **Persistencia e integración real** (Unidad 3, clase 2): hecho el 10/11/2026. Restricciones en la base de datos (migración `0005`), respuesta 503 si la fuente de datos falla, 409 si una restricción rechaza el registro, pruebas T49 a T53 y prueba de persistencia tras reiniciar. Documento del taller en `docs/Taller_Integracion_Equipo_HuellitasWeb.pdf`.
+8. 🟡 **Motor de producción:** decidir el motor de base de datos definitivo y repetir la prueba de persistencia. Gracias a los repositorios, el cambio se limita a `settings.py` y a `repositorios.py`.
 
 ## 6.3 Bloqueos y riesgos técnicos identificados
 
 - **Fotos en la base de datos:** guardar la ruta del frontend acopla el backend con la estructura de carpetas del frontend.
-- **Abrir `index.html` con doble clic no funciona:** los módulos de JavaScript necesitan un servidor (`file://` los bloquea). Siempre se usa `http://127.0.0.1:8000/` (o Live Server con la API encendida).
+- ✅ **Abrir `index.html` con doble clic** (resuelto el 17/11/2026): los navegadores bloquean los módulos de JavaScript en `file://`, y faltaban el menú, el pie y los animales. Los scripts pasaron a ser clásicos con `defer`, la página busca la API en `http://127.0.0.1:8000` y, en desarrollo, la API acepta el origen `null` que envía una página abierta como archivo. Sin el servidor encendido, la página se ve completa y explica cómo encenderlo.
 - **Datos personales:** las solicitudes contienen documento, dirección y teléfono. Antes de publicar el sitio se necesita HTTPS y una política de retención de datos.

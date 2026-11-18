@@ -11,6 +11,7 @@ Equipo: Diego Alejandro Mosquera Caicedo, José Miguel Vera Castillo, Camilo And
 |---|---|
 | 1 | Página en HTML5 puro (sin CSS ni JavaScript) |
 | 2 | Componentes reutilizables, CSS y API REST con Django + Django REST Framework organizada en capas (Controller → Service → Repository). Flujos verticales completos: **registrar una solicitud de adopción** y **registrarse como voluntario** |
+| 3 | Persistencia e integración real: restricciones de integridad en la base de datos, errores 409 y 503 de la fuente de datos, prueba de persistencia después de reiniciar, panel de administración y rediseño visual de la página |
 
 ## Estructura
 
@@ -42,8 +43,9 @@ Huellitas_Web_HTML5/
 │       ├── permisos.py       Quién puede hacer qué (403)
 │       ├── urls.py           Endpoints
 │       ├── admin.py          Panel /admin/ (sus acciones usan los servicios)
-│       ├── tests.py          Matriz de pruebas (48 casos)
-│       └── migrations/       Esquema + 6 animales iniciales
+│       ├── tests.py          Matriz de pruebas (53 casos)
+│       └── migrations/       Esquema, 6 animales iniciales y restricciones de integridad
+│   └── verificar_persistencia.py  Prueba: registrar, reiniciar el servicio y consultar
 └── docs/                     Actividades de clase
     ├── 01-componentes.md
     ├── 02-arquitectura-por-capas.md
@@ -51,7 +53,8 @@ Huellitas_Web_HTML5/
     ├── 04-contrato-api.md
     ├── 05-pruebas.md
     ├── 06-semaforo-y-pendientes.md
-    └── evidencias/resultado-pruebas.txt
+    ├── Taller_Integracion_Equipo_HuellitasWeb.pdf   Documento del taller (y su .docx)
+    └── evidencias/               Salidas de las pruebas, de la persistencia y de la estructura de la BD
 ```
 
 ## Cómo ejecutarlo (Windows)
@@ -68,13 +71,20 @@ python -m venv .venv
 
 Luego abrir **http://127.0.0.1:8000/**. Django sirve la página y la API en el mismo origen.
 
-> No abras `index.html` con doble clic: los módulos de JavaScript necesitan un servidor. Si prefieres Live Server de VS Code (puerto 5500), deja también encendido `runserver`; la API ya permite ese origen (CORS).
+> También puedes abrir `refugio-html5/index.html` con doble clic o con Live Server de VS Code (puerto 5500): la página busca la API en `http://127.0.0.1:8000`, así que `runserver` debe estar encendido. Si no lo está, la página se ve completa y avisa cómo encenderlo en lugar de mostrar los animales.
 
 ### Ejecutar las pruebas
 
 ```powershell
 cd backend
 .venv\Scripts\python manage.py test adopciones -v 2
+```
+
+Prueba de persistencia (enciende y apaga su propio servidor en el puerto 8010 y borra lo que crea):
+
+```powershell
+cd backend
+.venv\Scripts\python verificar_persistencia.py
 ```
 
 ### Panel de administración

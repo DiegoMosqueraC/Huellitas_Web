@@ -2,7 +2,7 @@
 Matriz de pruebas de la API (ver docs/05-pruebas.md).
 
 "Funciona" no es suficiente: además del camino feliz se prueba que la API
-falla correctamente (400, 401, 403, 404, 409 y 500 controlado).
+falla correctamente (400, 401, 403, 404, 409, 429, 500 y 503 controlados).
 Ejecutar:  python manage.py test adopciones -v 2
 """
 from datetime import timedelta
@@ -10,12 +10,14 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.db import IntegrityError, OperationalError, transaction
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from .models import Animal, SolicitudAdopcion, Voluntario
+from .repositorios import SolicitudRepository
 
 LUNA_ID = 1
 ZEUS_ID = 4  # estado EN_PROCESO en los datos iniciales
@@ -506,3 +508,81 @@ class SesionApiTests(PruebaBase):
         self.assertEqual(detalle['estado_texto'], 'Recibida')
         vid = self.client.post('/api/voluntarios/', voluntario_valido(), format='json').data['id']
         self.assertEqual(self.client.get(f'/api/voluntarios/{vid}/').data['estados_siguientes'], ['ACTIVO', 'INACTIVO'])
+
+
+class PersistenciaEIntegridadTests(PruebaBase):
+    """Unidad 3, clase 2: la fuente de datos real, sus restricciones, transacciones y fallos."""
+
+    def test_T49_base_de_datos_no_disponible(self):
+        """T49 Si la base de datos no responde -> 503 SERVICIO_NO_DISPONIBLE con Retry-After, sin detalles internos."""
+        with patch('adopciones.repositorios.AnimalRepository.obtener_todos',
+                   side_effect=OperationalError('unable to open database file')):
+            with self.assertLogs('adopciones', level='ERROR'):
+                r = self.client.get('/api/animales/')
+        self.assertError(r, 503, 'SERVICIO_NO_DISPONIBLE')
+        self.assertEqual(r['Retry-After'], '30')
+        self.assertNotIn('database file', r.data['error']['mensaje'])
+
+    def test_T50_la_aprobacion_es_atomica(self):
+        """T50 Si falla guardar la solicitud al aprobar, el animal NO queda EN_PROCESO (rollback de la transacción)."""
+        sid = self.client.post('/api/solicitudes/', solicitud_valida(), format='json').data['id']
+        self.como(self.token_admin)
+        self.client.patch(f'/api/solicitudes/{sid}/', {'estado': 'EN_REVISION'}, format='json')
+        actualizar_real = SolicitudRepository.actualizar
+
+        def falla_al_aprobar(repositorio, solicitud, datos):
+            if datos['estado'] == 'APROBADA':
+                raise RuntimeError('fallo simulado después de actualizar el animal')
+            return actualizar_real(repositorio, solicitud, datos)
+
+        with patch('adopciones.repositorios.SolicitudRepository.actualizar', falla_al_aprobar):
+            with self.assertLogs('adopciones', level='ERROR'):
+                r = self.client.patch(f'/api/solicitudes/{sid}/', {'estado': 'APROBADA'}, format='json')
+        self.assertError(r, 500, 'ERROR_INTERNO')
+        self.assertEqual(Animal.objects.get(pk=LUNA_ID).estado, 'DISPONIBLE')
+        self.assertEqual(SolicitudAdopcion.objects.get(pk=sid).estado, 'EN_REVISION')
+
+    def test_T51_la_base_de_datos_rechaza_datos_invalidos(self):
+        """T51 Aunque se escriba sin pasar por la API, las restricciones CHECK y UNIQUE de la BD rechazan el registro."""
+        self.client.post('/api/solicitudes/', solicitud_valida(), format='json')
+        original = SolicitudAdopcion.objects.get()
+
+        def copia(**cambios):
+            datos = {c.name: getattr(original, c.name) for c in SolicitudAdopcion._meta.concrete_fields if c.name != 'id'}
+            datos.update(cambios)
+            return datos
+
+        casos = {
+            'UNIQUE solicitud activa duplicada': lambda: SolicitudAdopcion.objects.create(**copia()),
+            'CHECK personas_hogar': lambda: SolicitudAdopcion.objects.create(**copia(documento='A1', personas_hogar=0)),
+            'CHECK horas_solo': lambda: SolicitudAdopcion.objects.create(**copia(documento='A2', horas_solo=20)),
+            'CHECK autorizaciones': lambda: SolicitudAdopcion.objects.create(**copia(documento='A3', acepta_datos=False)),
+            'CHECK edad del voluntario': lambda: Voluntario.objects.create(
+                nombre='Niño', correo='n@correo.com', telefono='3000000000', edad=10, disponibilidad=['sabado'],
+                area='cuidado', experiencia=False, acepta_datos=True),
+            'CHECK edad del animal': lambda: Animal.objects.filter(pk=LUNA_ID).update(edad_meses=9999),
+        }
+        for nombre, operacion in casos.items():
+            with self.subTest(nombre), self.assertRaises(IntegrityError), transaction.atomic():
+                operacion()
+        self.assertEqual(SolicitudAdopcion.objects.count(), 1)
+
+    def test_T52_conflicto_detectado_por_la_base_de_datos(self):
+        """T52 Dos registros simultáneos con el mismo correo: el servicio no lo ve, la BD sí -> 409 controlado, no 500."""
+        self.client.post('/api/voluntarios/', voluntario_valido(), format='json')
+        with patch('adopciones.repositorios.VoluntarioRepository.existe_correo', return_value=False):
+            with self.assertLogs('adopciones', level='WARNING'):
+                r = self.client.post('/api/voluntarios/', voluntario_valido(), format='json')
+        self.assertError(r, 409, 'CONFLICTO')
+
+    def test_T53_lo_que_se_guarda_es_lo_que_se_consulta(self):
+        """T53 Consistencia entre operaciones: POST -> GET lista -> GET detalle -> PATCH -> GET devuelven el mismo registro."""
+        creada = self.client.post('/api/solicitudes/', solicitud_valida(), format='json').data
+        self.como(self.token_admin)
+        lista = self.client.get('/api/solicitudes/').data
+        detalle = self.client.get(f'/api/solicitudes/{creada["id"]}/').data
+        self.assertEqual([s['id'] for s in lista], [creada['id']])
+        self.assertEqual(detalle['documento'], '1090123456')
+        self.assertEqual(detalle['otras_mascotas'], ['ninguna'])
+        self.client.patch(f'/api/solicitudes/{creada["id"]}/', {'estado': 'EN_REVISION'}, format='json')
+        self.assertEqual(self.client.get(f'/api/solicitudes/{creada["id"]}/').data['estado'], 'EN_REVISION')

@@ -4,7 +4,7 @@
 
 - **Herramienta:** pruebas automáticas de Django REST Framework (`APITestCase`) en `backend/adopciones/tests.py`.
 - **Cómo ejecutarlas:** `cd backend` y luego `.venv\Scripts\python manage.py test adopciones -v 2`
-- **Evidencia:** salida completa de la ejecución en [`evidencias/resultado-pruebas.txt`](evidencias/resultado-pruebas.txt) (48 pruebas, 48 OK, 27/10/2026).
+- **Evidencia:** salida completa de la ejecución en [`evidencias/resultado-pruebas.txt`](evidencias/resultado-pruebas.txt) (53 pruebas, 53 OK, 10/11/2026).
 - Cada prueba usa una base de datos temporal en memoria con los 6 animales iniciales; no modifica `db.sqlite3`.
 
 ## 5.1 Resumen por tipo de caso
@@ -18,7 +18,10 @@
 | Sin permisos | 403 | T07, T22, T31, T40, T45 | PASS |
 | Conflicto | 409 | T12, T18, T19, T29, T34, T35, T38, T39, T41 | PASS |
 | Demasiados intentos | 429 | T47 | PASS |
-| Error inesperado | 500 | T23 | PASS |
+| Error inesperado | 500 | T23, T50 | PASS |
+| Base de datos no disponible | 503 | T49 | PASS |
+| Restricciones de la base de datos | `IntegrityError` → 409 | T51, T52 | PASS |
+| Consistencia entre operaciones | 201 → 200 → 200 | T53 | PASS |
 
 ## 5.2 Detalle de cada prueba
 
@@ -72,6 +75,11 @@
 | T46 | `DELETE /api/sesion/` sin token, y luego con token | 401; luego 204 y el token ya no sirve (401) | Igual a lo esperado | PASS |
 | T47 | 10 intentos fallidos y luego uno correcto | 429 `DEMASIADOS_INTENTOS` | 429 | PASS |
 | T48 | Detalle de solicitud RECIBIDA y de voluntario PENDIENTE | `estados_siguientes` = [EN_REVISION, RECHAZADA] y [ACTIVO, INACTIVO] | Igual a lo esperado | PASS |
+| T49 | `GET /api/animales/` con la base de datos sin responder (`OperationalError` simulado) | 503 `SERVICIO_NO_DISPONIBLE` con `Retry-After`, sin detalles internos | 503, `Retry-After: 30` | PASS |
+| T50 | Aprobar una solicitud provocando una falla después de actualizar el animal | 500 controlado; la transacción revierte todo | Luna sigue DISPONIBLE y la solicitud EN_REVISION | PASS |
+| T51 | Seis escrituras inválidas directo con el ORM (duplicado activo, personas 0, horas 20, sin autorizaciones, voluntario de 10 años, animal de 9999 meses) | La base de datos lanza `IntegrityError` en cada una | Las seis rechazadas; sigue 1 registro | PASS |
+| T52 | Segundo voluntario con el mismo correo, simulando que el servicio no lo detectó (carrera) | 409 `CONFLICTO` controlado, no 500 | 409 | PASS |
+| T53 | `POST` → `GET` lista → `GET` detalle → `PATCH` → `GET` | El mismo registro con los mismos datos en todas | Coincide | PASS |
 
 ## 5.3 Pruebas manuales en el navegador (27/10/2026)
 
@@ -113,3 +121,24 @@ Con un administrador temporal (contraseña aleatoria), dos solicitudes y un volu
 ## 5.5 Verificación de los PATCH contra el servidor real (27/10/2026)
 
 Se creó un administrador temporal con token y se recorrió el flujo completo por HTTP. Los resultados están en la tabla de respuestas reales de `04-contrato-api.md` (sección 4.2.2). Al terminar se borraron el usuario temporal, la solicitud y el voluntario, y Canela volvió a DISPONIBLE.
+
+## 5.6 Persistencia después de reiniciar el servicio (17/11/2026)
+
+Prueba obligatoria del taller de integración: registrar, verificar, reiniciar el servicio y consultar de nuevo. Es repetible con:
+
+```powershell
+cd backend
+.venv\Scripts\python verificar_persistencia.py
+```
+
+El guion enciende el servidor en el puerto 8010, registra una solicitud con `POST /api/solicitudes/`, la lee directamente del archivo SQLite, apaga el servidor (comprueba que ya no acepta conexiones), lo enciende de nuevo y consulta el mismo registro con `GET /api/solicitudes/{id}/`. Al terminar borra el registro y el usuario temporal que creó.
+
+| Momento | Comprobación | Resultado |
+|---|---|---|
+| Antes del reinicio | `POST /api/solicitudes/` | 201, estado RECIBIDA |
+| Antes del reinicio | `SELECT` directo en SQLite | El registro está con los datos enviados |
+| Servicio apagado | Petición al servidor | Conexión rechazada |
+| Después del reinicio | `GET /api/solicitudes/{id}/` | 200, mismos datos |
+| Después del reinicio | Repetir el `POST` | 409: el servicio recuerda la solicitud |
+
+Evidencias: [`evidencias/persistencia-tras-reinicio.txt`](evidencias/persistencia-tras-reinicio.txt) y [`evidencias/estructura-base-de-datos.txt`](evidencias/estructura-base-de-datos.txt) (tablas, migraciones, llaves y restricciones leídas del archivo SQLite).

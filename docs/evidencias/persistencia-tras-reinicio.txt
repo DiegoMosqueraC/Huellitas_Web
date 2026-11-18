@@ -1,0 +1,18 @@
+Fuente de datos: SQLite, archivo backend/db.sqlite3
+
+1. Se enciende el servicio y se registra una solicitud
+  OK    POST /api/solicitudes/ -> 201, id 4, estado RECIBIDA
+
+2. Comprobación doble: el registro está en la base de datos
+  OK    SELECT directo en SQLite -> (4, 'Persona De Prueba', '9000000001', 'RECIBIDA')
+
+3. Se apaga el servicio
+  OK    El servidor ya no acepta conexiones
+
+4. Se enciende de nuevo y se consulta el mismo registro
+  OK    POST /api/sesion/ -> 200
+  OK    GET /api/solicitudes/4/ -> 200
+  OK    Mismos datos que antes del reinicio: Persona De Prueba, 9000000001, RECIBIDA
+  OK    Repetir el POST después del reinicio -> 409 (el servicio recuerda la solicitud)
+
+RESULTADO: la información persiste después de reiniciar el servicio.

@@ -161,8 +161,13 @@ REST_FRAMEWORK = {
     },
 }
 
-# Permite consumir la API desde Live Server de VS Code (puerto 5500).
+# Permite consumir la API desde Live Server de VS Code (puerto 5500) y, en
+# desarrollo, desde la página abierta con doble clic (file://), que el navegador
+# identifica con el origen "null". Las operaciones de administración siguen
+# exigiendo el token Bearer, así que este origen no da permisos adicionales.
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5500',
     'http://localhost:5500',
 ]
+if DEBUG:
+    CORS_ALLOWED_ORIGINS.append('null')

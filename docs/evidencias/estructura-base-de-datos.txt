@@ -1,0 +1,53 @@
+Fuente de datos: SQLite, archivo backend/db.sqlite3
+Version del motor: 3.40.1
+
+Tablas de la aplicacion y numero de registros:
+  adopciones_animal: 6
+  adopciones_solicitudadopcion: 0
+  adopciones_voluntario: 0
+
+Migraciones aplicadas (adopciones):
+  [X] 0001_initial
+  [X] 0002_animales_iniciales
+  [X] 0003_voluntario
+  [X] 0004_cambio_de_estado
+  [X] 0005_restricciones_de_integridad
+
+Estructura de adopciones_solicitudadopcion (PRAGMA table_info):
+  columna                  tipo           NOT NULL  PK
+  id                       INTEGER        si        si
+  nombre                   varchar(100)   si        
+  tipo_documento           varchar(3)     si        
+  documento                varchar(15)    si        
+  fecha_nacimiento         date           si        
+  correo                   varchar(254)   si        
+  telefono                 varchar(10)    si        
+  direccion                varchar(150)   si        
+  ciudad                   varchar(60)    si        
+  tipo_vivienda            varchar(12)    si        
+  tenencia                 varchar(10)    si        
+  personas_hogar           smallint unsigned si        
+  otras_mascotas           TEXT           si        
+  horas_solo               smallint unsigned si        
+  fecha_visita             date           no        
+  hora_visita              time           no        
+  motivo                   TEXT           si        
+  medio                    varchar(20)    si        
+  acepta_datos             bool           si        
+  acepta_visita            bool           si        
+  estado                   varchar(12)    si        
+  fecha_creacion           datetime       si        
+  animal_id                bigint         no        
+  observacion              TEXT           si        
+  fecha_actualizacion      datetime       si        
+
+Llaves foraneas:
+  animal_id -> adopciones_animal(id)
+
+Restricciones CHECK:
+   solicitud_personas_hogar_rango : ("personas_hogar" >= 1 AND "personas_hogar" <= 20)
+   solicitud_horas_solo_maximo : "horas_solo" <= 12
+   solicitud_con_autorizaciones : ("acepta_datos" AND "acepta_visita")
+
+Indices UNIQUE:
+   CREATE UNIQUE INDEX "solicitud_activa_unica" ON "adopciones_solicitudadopcion" ("documento", "animal_id") WHERE "estado" IN ('RECIBIDA', 'EN_REVISION')

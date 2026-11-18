@@ -19,10 +19,17 @@
   <meta name="author" content="Diego Alejandro Mosquera Caicedo, José Miguel Vera Castillo, Camilo Andres Jaimes Gamboa">
   <title>Huellitas de Esperanza | Adopción de mascotas y voluntariado</title>
   <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+  <!-- Tipografías: Fredoka (títulos) y Nunito Sans (texto). Si no hay internet se usan las del sistema. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito+Sans:wght@400;700&display=swap">
   <link rel="stylesheet" href="css/estilos.css">
-  <script type="module" src="js/componentes.js"></script>
-  <script type="module" src="js/inicio.js"></script>
-  <script type="module" src="js/voluntarios.js"></script>
+  <!-- Scripts clásicos con defer (no módulos): así la página también funciona al abrirla con doble clic. -->
+  <script defer src="js/api.js"></script>
+  <script defer src="js/componentes.js"></script>
+  <script defer src="js/formularios.js"></script>
+  <script defer src="js/inicio.js"></script>
+  <script defer src="js/voluntarios.js"></script>
 </head>
 <body>
 
@@ -35,25 +42,47 @@
   <main>
 
     <!-- ===================== INICIO ===================== -->
-    <section id="inicio">
-      <h2>Bienvenido a Huellitas de Esperanza</h2>
-      <p>
-        Somos una fundación sin ánimo de lucro de Cúcuta, Norte de Santander. Desde nuestro refugio
-        rescatamos animales abandonados o maltratados, les damos atención veterinaria, los esterilizamos
-        y los preparamos para encontrar una familia que los quiera para siempre.
-      </p>
-      <p>
-        Con esta página queremos que conocer a nuestros animales, solicitar una adopción o unirse como
-        voluntario sea <strong>fácil, ordenado y transparente</strong>, sin depender solo de mensajes por redes sociales.
-      </p>
+    <section id="inicio" class="portada">
+      <div class="portada__texto">
+        <h1>Un hogar para cada huellita de Cúcuta</h1>
+        <p class="portada__bajada">
+          Rescatamos perros y gatos abandonados, los cuidamos y les buscamos una familia responsable.
+          Conócelos y envía tu solicitud de adopción en línea.
+        </p>
+        <p class="portada__acciones">
+          <a class="boton" href="#animales">Conocer a los animales</a>
+          <a class="boton boton--contorno" href="#voluntarios">Quiero ser voluntario</a>
+        </p>
+        <!-- js/inicio.js escribe aquí cuántos animales están disponibles hoy (GET /api/animales/). -->
+        <p id="portada-disponibles" class="portada__dato" aria-live="polite"></p>
+      </div>
+      <!-- Retratos de tres animales disponibles, con su placa de nombre (componente retratoAnimal). -->
+      <div id="portada-retratos" class="portada__retratos"></div>
+    </section>
 
-      <h3>Nuestro impacto en cifras</h3>
-      <ul>
-        <li><strong>45</strong> animales bajo nuestro cuidado actualmente.</li>
-        <li><strong>320</strong> adopciones responsables realizadas.</li>
-        <li><strong>60</strong> voluntarios activos.</li>
-      </ul>
-      <p><small>Cifras de ejemplo para la demostración del proyecto.</small></p>
+    <!-- ===================== QUIÉNES SOMOS ===================== -->
+    <section id="nosotros" class="nosotros">
+      <div>
+        <h2>Quiénes somos</h2>
+        <p>
+          Somos una fundación sin ánimo de lucro de Cúcuta, Norte de Santander. Desde nuestro refugio
+          rescatamos animales abandonados o maltratados, les damos atención veterinaria, los esterilizamos
+          y los preparamos para encontrar una familia que los quiera para siempre.
+        </p>
+        <p>
+          Con esta página queremos que conocer a nuestros animales, solicitar una adopción o unirse como
+          voluntario sea <strong>fácil, ordenado y transparente</strong>, sin depender solo de mensajes por redes sociales.
+        </p>
+      </div>
+      <div>
+        <h3>Nuestro impacto en cifras</h3>
+        <ul class="cifras">
+          <li><strong>45</strong> animales bajo nuestro cuidado actualmente.</li>
+          <li><strong>320</strong> adopciones responsables realizadas.</li>
+          <li><strong>60</strong> voluntarios activos.</li>
+        </ul>
+        <p><small>Cifras de ejemplo para la demostración del proyecto.</small></p>
+      </div>
     </section>
 
     <!-- ===================== CATÁLOGO DE ANIMALES ===================== -->
@@ -61,15 +90,17 @@
       <h2>Animales en adopción</h2>
       <p>Cada uno de ellos llega vacunado, desparasitado y esterilizado. Conócelos y elige a tu nuevo compañero.</p>
 
-      <h3>¿Qué significa la raza de cada animal?</h3>
-      <dl>
-        <dt>Raza definida</dt>
-        <dd>El animal tiene las características de una raza reconocida, por ejemplo labrador retriever o beagle.</dd>
-        <dt>Criollo</dt>
-        <dd>El animal no tiene una raza definida y no se le reconocen rasgos de una raza en particular.</dd>
-        <dt>Mestizo</dt>
-        <dd>El animal no tiene una raza definida, pero proviene del cruce de razas y conserva rasgos de alguna de ellas.</dd>
-      </dl>
+      <details class="glosario">
+        <summary>¿Qué significa raza definida, criollo o mestizo?</summary>
+        <dl>
+          <dt>Raza definida</dt>
+          <dd>El animal tiene las características de una raza reconocida, por ejemplo labrador retriever o beagle.</dd>
+          <dt>Criollo</dt>
+          <dd>El animal no tiene una raza definida y no se le reconocen rasgos de una raza en particular.</dd>
+          <dt>Mestizo</dt>
+          <dd>El animal no tiene una raza definida, pero proviene del cruce de razas y conserva rasgos de alguna de ellas.</dd>
+        </dl>
+      </details>
 
       <!-- Las tarjetas se generan con los datos de GET /api/animales/ (componente tarjetaAnimal). -->
       <div class="filtros" role="group" aria-label="Filtrar animales por especie">
@@ -112,7 +143,7 @@
       <p>Adoptar es un compromiso de muchos años. Por eso seguimos un proceso que protege al animal y a la familia.</p>
 
       <h3>Requisitos</h3>
-      <ul>
+      <ul class="requisitos">
         <li>Ser mayor de 18 años y presentar documento de identidad.</li>
         <li>Contar con la autorización del propietario si la vivienda es arrendada.</li>
         <li>Tener tiempo y recursos para alimentación, vacunas y controles veterinarios.</li>
@@ -120,7 +151,7 @@
       </ul>
 
       <h3>Pasos del proceso</h3>
-      <ol>
+      <ol class="pasos">
         <li>Diligencia la <a href="#solicitud">solicitud de adopción</a>.</li>
         <li>Nuestro equipo revisa tu solicitud en un plazo de 3 a 5 días hábiles.</li>
         <li>Realizamos una entrevista y una visita a tu hogar.</li>
@@ -449,21 +480,24 @@
       <h2>Contacto y ubicación</h2>
       <p>Visítanos o escríbenos. Con gusto resolvemos tus dudas sobre adopción, voluntariado o donaciones.</p>
 
-      <address>
-        Fundación Huellitas de Esperanza (ejemplo)<br>
+      <div class="contacto__rejilla">
+      <address class="panel">
+        <strong>Fundación Huellitas de Esperanza (ejemplo)</strong><br>
         Dirección: Calle 00 # 00-00, barrio de ejemplo, Cúcuta, Norte de Santander<br>
         Celular: <a href="tel:+573000000000">300 000 0000</a><br>
         Correo: <a href="mailto:adopciones@huellitas.example.org">adopciones@huellitas.example.org</a>
       </address>
 
-      <h3>Horario de atención</h3>
-      <ul>
-        <li>Lunes a viernes: 8:00 a. m. – 4:00 p. m.</li>
-        <li>Sábados: 8:00 a. m. – 12:00 m.</li>
-        <li>Domingos y festivos: solo jornadas programadas.</li>
-      </ul>
+      <div class="panel">
+        <h3>Horario de atención</h3>
+        <ul>
+          <li>Lunes a viernes: 8:00 a. m. – 4:00 p. m.</li>
+          <li>Sábados: 8:00 a. m. – 12:00 m.</li>
+          <li>Domingos y festivos: solo jornadas programadas.</li>
+        </ul>
+      </div>
 
-      <aside>
+      <aside class="panel">
         <h3>Otras formas de ayudar</h3>
         <p>Si no puedes adoptar, puedes donar alimento, cobijas o medicamentos en nuestra sede, o compartir nuestras publicaciones.</p>
         <p>
@@ -471,6 +505,7 @@
           <a href="https://www.minambiente.gov.co" target="_blank" rel="noopener noreferrer">Ministerio de Ambiente y Desarrollo Sostenible</a>.
         </p>
       </aside>
+      </div>
     </section>
 
   </main>

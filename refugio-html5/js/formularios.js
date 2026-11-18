@@ -13,12 +13,12 @@ function etiquetaDe(formulario, campoApi, campos) {
   return { elemento, texto: etiqueta ? etiqueta.textContent.replace('*', '').trim() : campoApi };
 }
 
-export function limpiarErrores(formulario) {
+function limpiarErrores(formulario) {
   formulario.querySelectorAll('[aria-invalid="true"]').forEach((el) => el.removeAttribute('aria-invalid'));
 }
 
 /* Marca los campos con error y devuelve la lista de mensajes "Etiqueta: error". */
-export function marcarErrores(formulario, detalles, campos = {}) {
+function marcarErrores(formulario, detalles, campos = {}) {
   const items = [];
   for (const [campo, mensajes] of Object.entries(detalles ?? {})) {
     const { elemento, texto } = etiquetaDe(formulario, campo, campos);
