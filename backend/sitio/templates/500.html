@@ -1,0 +1,10 @@
+{% extends 'sitio/base.html' %}
+{% block titulo %}Error del servidor{% endblock %}
+
+{% block contenido %}
+<section class="cabecera">
+  <h1>Algo salió mal</h1>
+  <p>Tuvimos un problema al cargar esta página. Intenta de nuevo en unos minutos.</p>
+  <p class="portada__acciones"><a class="boton" href="{% url 'sitio:inicio' %}">Ir al inicio</a></p>
+</section>
+{% endblock %}

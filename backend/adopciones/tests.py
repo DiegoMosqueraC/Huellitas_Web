@@ -16,7 +16,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from .models import Animal, SolicitudAdopcion, Voluntario
+from .models import Animal, Jornada, SolicitudAdopcion, Voluntario
 from .repositorios import SolicitudRepository
 
 LUNA_ID = 1
@@ -586,3 +586,66 @@ class PersistenciaEIntegridadTests(PruebaBase):
         self.assertEqual(detalle['otras_mascotas'], ['ninguna'])
         self.client.patch(f'/api/solicitudes/{creada["id"]}/', {'estado': 'EN_REVISION'}, format='json')
         self.assertEqual(self.client.get(f'/api/solicitudes/{creada["id"]}/').data['estado'], 'EN_REVISION')
+
+
+class Entrega4ApiTests(PruebaBase):
+    """Filtro por tamaño, jornadas de voluntariado y consulta de solicitud."""
+
+    def setUp(self):
+        super().setUp()
+        cache.clear()  # el límite de intentos de la consulta se guarda en la caché
+
+    def test_T54_filtrar_por_tamano(self):
+        """T54 GET /api/animales/?tamano=pequeno -> 200 solo pequeños; tamaño inexistente -> 400."""
+        r = self.client.get('/api/animales/', {'tamano': 'pequeno'})
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual({a['nombre'] for a in r.data}, {'Tomás', 'Canela', 'Miel'})
+        r = self.client.get('/api/animales/', {'especie': 'perro', 'tamano': 'pequeno'})
+        self.assertEqual([a['nombre'] for a in r.data], ['Canela'])
+        r = self.client.get('/api/animales/', {'tamano': 'gigante'})
+        self.assertError(r, 400, 'DATOS_INVALIDOS')
+        self.assertIn('tamano', r.data['error']['detalles'])
+
+    def test_T55_proximas_jornadas(self):
+        """T55 GET /api/jornadas/ -> 200 solo jornadas de hoy en adelante, en orden de fecha."""
+        Jornada.objects.all().delete()
+        hoy = timezone.localdate()
+        for dias, actividad in ((-1, 'Pasada'), (10, 'Lejana'), (0, 'Hoy'), (3, 'Cercana')):
+            Jornada.objects.create(fecha=hoy + timedelta(days=dias), hora_inicio='08:00', hora_fin='12:00',
+                                   actividad=actividad, lugar='Refugio', cupos=5)
+        r = self.client.get('/api/jornadas/')
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual([j['actividad'] for j in r.data], ['Hoy', 'Cercana', 'Lejana'])
+
+    def test_T56_consultar_solicitud(self):
+        """T56 POST /api/solicitudes/consulta/ con número y documento -> 200 con el estado, sin datos personales."""
+        sid = self.client.post('/api/solicitudes/', solicitud_valida(), format='json').data['id']
+        self.como(self.token_admin)
+        self.client.patch(f'/api/solicitudes/{sid}/', {'estado': 'RECHAZADA', 'observacion': 'Vivienda sin cerramiento.'}, format='json')
+        self.client.credentials()
+        r = self.client.post('/api/solicitudes/consulta/', {'numero': sid, 'documento': '1090123456'}, format='json')
+        self.assertEqual(r.status_code, status.HTTP_200_OK, r.content)
+        self.assertEqual(r.data['estado'], 'RECHAZADA')
+        self.assertEqual(r.data['observacion'], 'Vivienda sin cerramiento.')
+        self.assertEqual(r.data['animal'], {'id': LUNA_ID, 'nombre': 'Luna'})
+        for dato_personal in ('documento', 'correo', 'telefono', 'direccion', 'nombre'):
+            self.assertNotIn(dato_personal, r.data)
+
+    def test_T57_consulta_no_revela_solicitudes_ajenas(self):
+        """T57 Documento equivocado o número inexistente -> 404 con el mismo mensaje; campos faltantes -> 400."""
+        sid = self.client.post('/api/solicitudes/', solicitud_valida(), format='json').data['id']
+        ajena = self.client.post('/api/solicitudes/consulta/', {'numero': sid, 'documento': '99999999'}, format='json')
+        inexistente = self.client.post('/api/solicitudes/consulta/', {'numero': 999, 'documento': '1090123456'}, format='json')
+        self.assertError(ajena, 404, 'RECURSO_NO_ENCONTRADO')
+        self.assertError(inexistente, 404, 'RECURSO_NO_ENCONTRADO')
+        self.assertEqual(ajena.data['error']['mensaje'], inexistente.data['error']['mensaje'])
+        r = self.client.post('/api/solicitudes/consulta/', {}, format='json')
+        self.assertError(r, 400, 'DATOS_INVALIDOS')
+        self.assertEqual(set(r.data['error']['detalles']), {'numero', 'documento'})
+
+    def test_T58_limite_de_consultas(self):
+        """T58 Más de 10 consultas por minuto desde la misma IP -> 429 DEMASIADOS_INTENTOS."""
+        for _ in range(10):
+            self.client.post('/api/solicitudes/consulta/', {'numero': 1, 'documento': '12345'}, format='json')
+        r = self.client.post('/api/solicitudes/consulta/', {'numero': 1, 'documento': '12345'}, format='json')
+        self.assertError(r, 429, 'DEMASIADOS_INTENTOS')

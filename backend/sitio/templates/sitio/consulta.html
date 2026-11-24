@@ -1,0 +1,52 @@
+{% extends 'sitio/base.html' %}
+{% load static %}
+{% block titulo %}Consulta tu solicitud{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block scripts %}
+  <script defer src="{% static 'js/api.js' %}"></script>
+  <script defer src="{% static 'js/componentes.js' %}"></script>
+  <script defer src="{% static 'js/formularios.js' %}"></script>
+  <script defer src="{% static 'js/consulta.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+<section class="cabecera">
+  <h1>Consulta tu solicitud</h1>
+  <p>Escribe el número que recibiste al enviar tu solicitud de adopción y tu documento para ver en qué va el proceso.</p>
+</section>
+
+<section class="consulta">
+  {# js/consulta.js envía estos datos a POST /api/solicitudes/consulta/ (POST para que el documento no quede en la dirección). #}
+  <form id="form-consulta" class="form-consulta" action="/api/solicitudes/consulta/" method="post">
+    <fieldset>
+      <legend>Tus datos</legend>
+      <p>
+        <label for="numero">Número de solicitud *</label><br>
+        <input type="number" id="numero" name="numero" required min="1" inputmode="numeric" placeholder="Ej.: 12">
+      </p>
+      <p>
+        <label for="consulta-documento">Número de documento *</label><br>
+        <input type="text" id="consulta-documento" name="documento" required pattern="[0-9A-Za-z]{5,15}"
+               title="Entre 5 y 15 caracteres, solo letras y números" inputmode="numeric" autocomplete="off">
+      </p>
+      <p><button type="submit">Consultar</button></p>
+    </fieldset>
+  </form>
+
+  <div id="resultado-consulta" class="resultado-consulta" role="status" aria-live="polite"></div>
+</section>
+
+<section class="fondo-suave">
+  <h2>¿Qué significa cada estado?</h2>
+  <dl class="estados">
+    <dt><span class="estado estado--recibida">Recibida</span></dt>
+    <dd>Tu solicitud llegó. La revisaremos en un plazo de 3 a 5 días hábiles.</dd>
+    <dt><span class="estado estado--en_revision">En revisión</span></dt>
+    <dd>Estamos evaluándola. Te contactaremos para la entrevista y la visita a tu hogar.</dd>
+    <dt><span class="estado estado--aprobada">Aprobada</span></dt>
+    <dd>¡Felicitaciones! Coordinaremos contigo la firma del acta y la entrega.</dd>
+    <dt><span class="estado estado--rechazada">Rechazada</span></dt>
+    <dd>Esta vez no fue posible. Verás el motivo y puedes enviar una nueva solicitud.</dd>
+  </dl>
+</section>
+{% endblock %}

@@ -3,8 +3,8 @@
 "Funciona" no es suficiente: se prueba el camino feliz y que la API **falle correctamente**.
 
 - **Herramienta:** pruebas automáticas de Django REST Framework (`APITestCase`) en `backend/adopciones/tests.py`.
-- **Cómo ejecutarlas:** `cd backend` y luego `.venv\Scripts\python manage.py test adopciones -v 2`
-- **Evidencia:** salida completa de la ejecución en [`evidencias/resultado-pruebas.txt`](evidencias/resultado-pruebas.txt) (53 pruebas, 53 OK, 10/11/2026).
+- **Cómo ejecutarlas:** `cd backend` y luego `.venv\Scripts\python manage.py test -v 2` (API en `adopciones/tests.py` y páginas en `sitio/tests.py`)
+- **Evidencia:** salida completa de la ejecución en [`evidencias/resultado-pruebas.txt`](evidencias/resultado-pruebas.txt) (64 pruebas, 64 OK, 23/11/2026).
 - Cada prueba usa una base de datos temporal en memoria con los 6 animales iniciales; no modifica `db.sqlite3`.
 
 ## 5.1 Resumen por tipo de caso
@@ -80,6 +80,11 @@
 | T51 | Seis escrituras inválidas directo con el ORM (duplicado activo, personas 0, horas 20, sin autorizaciones, voluntario de 10 años, animal de 9999 meses) | La base de datos lanza `IntegrityError` en cada una | Las seis rechazadas; sigue 1 registro | PASS |
 | T52 | Segundo voluntario con el mismo correo, simulando que el servicio no lo detectó (carrera) | 409 `CONFLICTO` controlado, no 500 | 409 | PASS |
 | T53 | `POST` → `GET` lista → `GET` detalle → `PATCH` → `GET` | El mismo registro con los mismos datos en todas | Coincide | PASS |
+| T54 | `GET /api/animales/?tamano=pequeno`, combinado con `especie=perro`, y `tamano=gigante` | 200 con Tomás, Canela y Miel; luego solo Canela; 400 con detalle `tamano` | Igual a lo esperado | PASS |
+| T55 | `GET /api/jornadas/` con jornadas de ayer, hoy, en 3 y en 10 días | 200 solo hoy, 3 y 10 días, en ese orden | Igual a lo esperado | PASS |
+| T56 | `POST /api/solicitudes/consulta/` de una solicitud rechazada | 200 con estado, observación y animal, sin datos personales | Igual a lo esperado | PASS |
+| T57 | Consulta con documento ajeno, con número inexistente y sin campos | 404, 404 con el mismo mensaje, y 400 | Igual a lo esperado | PASS |
+| T58 | 11 consultas seguidas | 429 `DEMASIADOS_INTENTOS` en la undécima | 429 | PASS |
 
 ## 5.3 Pruebas manuales en el navegador (27/10/2026)
 
@@ -92,8 +97,8 @@ Con el servidor encendido (`http://127.0.0.1:8000/`):
 | Solicitud válida | Llenar el formulario para Luna y enviar | Mensaje "¡Solicitud #1 recibida para adoptar a Luna!" con estado RECIBIDA |
 | Solicitud duplicada | Enviar de nuevo la misma solicitud | Aviso "Ya tienes una solicitud activa para este animal." |
 | Error de servidor en un campo | Desactivar la validación HTML y enviar un celular de 5 dígitos | Mensaje de error y el campo Celular marcado en rojo |
-| Detalle | Abrir `animal.html?id=4` | Ficha de Zeus con la etiqueta "En proceso de adopción" |
-| Detalle inexistente | Abrir `animal.html?id=999` | "Este animal no existe o ya no está publicado." |
+| Detalle | Abrir la ficha de Zeus (hoy `/animales/4/`) | Ficha de Zeus con la etiqueta "En proceso de adopción" |
+| Detalle inexistente | Abrir un animal inexistente (hoy `/animales/999/`, página 404 propia) | "Este animal no existe o ya no está publicado." |
 | Celular (375 px) | Vista móvil del formulario | Sin desplazamiento horizontal |
 | Voluntario sin días | Intentar enviar sin marcar días | El navegador avisa "Elige al menos un día disponible." |
 | Voluntario menor en hogar de paso | Edad 16, área "Hogar de paso temporal" | Error del servidor y el campo Área marcado en rojo |
@@ -142,3 +147,18 @@ El guion enciende el servidor en el puerto 8010, registra una solicitud con `POS
 | Después del reinicio | Repetir el `POST` | 409: el servicio recuerda la solicitud |
 
 Evidencias: [`evidencias/persistencia-tras-reinicio.txt`](evidencias/persistencia-tras-reinicio.txt) y [`evidencias/estructura-base-de-datos.txt`](evidencias/estructura-base-de-datos.txt) (tablas, migraciones, llaves y restricciones leídas del archivo SQLite).
+
+## 5.7 Pruebas de las páginas (entrega 4, 23/11/2026)
+
+Archivo `backend/sitio/tests.py`. Comprueban que cada página del mapa del sitio responde y muestra los datos de la base de datos.
+
+| ID | Entrada | Esperado | Estado |
+|---|---|---|---|
+| P01 | Las 7 páginas del mapa del sitio | 200, el menú marca la página actual y el pie muestra el mapa del sitio | PASS |
+| P02 | `/` | "hay 5 animales esperando" y tres retratos | PASS |
+| P03 | `/animales/`, `?especie=gato`, `?tamano=grande`, `?especie=loro` | 6, 2 y 1 tarjetas; el filtro inválido avisa y muestra los 6 | PASS |
+| P04 | `/animales/1/` y `/animales/999/` | Ficha de Luna con su botón de adopción; 404 con la página propia | PASS |
+| P05 | `/adoptar/?animal=3` | Canela queda elegida y Zeus (en proceso) deshabilitado | PASS |
+| P06 | `/voluntarios/` sin jornadas y con una pasada y una futura | Aviso de "no hay jornadas"; luego solo la futura, que también aparece en el inicio | PASS |
+
+Además se recorrió el flujo completo en el navegador: enviar una solicitud desde `/adoptar/?animal=2`, consultarla en `/mi-solicitud/` con un documento equivocado (mensaje genérico) y con el correcto (estado "Recibida" y enlace a la ficha de Tomás), registrar un voluntario y revisar el catálogo a 375 px de ancho sin desplazamiento horizontal. Los registros de prueba se borraron después.

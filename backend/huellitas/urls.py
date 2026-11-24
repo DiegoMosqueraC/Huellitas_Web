@@ -1,24 +1,14 @@
 """
 Rutas del proyecto:
-- /api/...   API REST (JSON)
+- /api/...   API REST (JSON) de la app adopciones
 - /admin/    panel de administración de Django
-- /...       frontend (HTML + CSS + JS de la carpeta refugio-html5)
+- /...       páginas del sitio (app sitio, plantillas de Django)
 """
-from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path, re_path
-from django.views.static import serve
-
-
-def frontend(request, ruta=''):
-    respuesta = serve(request, ruta or 'index.html', document_root=settings.FRONTEND_DIR)
-    # El navegador revalida cada archivo, así los cambios en HTML/CSS/JS se ven al recargar.
-    respuesta['Cache-Control'] = 'no-cache'
-    return respuesta
-
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('adopciones.urls')),
-    re_path(r'^(?P<ruta>.*)$', frontend),
+    path('', include('sitio.urls')),
 ]

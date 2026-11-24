@@ -9,7 +9,7 @@ del negocio viven en un solo lugar, aunque haya dos "controladores".
 from django.contrib import admin, messages
 
 from .errores import ErrorDeNegocio
-from .models import Animal, SolicitudAdopcion, Voluntario
+from .models import Animal, Jornada, SolicitudAdopcion, Voluntario
 from .servicios import SolicitudService, VoluntarioService
 
 
@@ -69,3 +69,8 @@ class VoluntarioAdmin(admin.ModelAdmin):
         servicio = VoluntarioService()
         aplicar_a_cada_uno(self, request, queryset,
                            lambda v: servicio.cambiar_estado(v.pk, Voluntario.Estado.INACTIVO))
+
+
+@admin.register(Jornada)
+class JornadaAdmin(admin.ModelAdmin):
+    list_display = ['fecha', 'hora_inicio', 'hora_fin', 'actividad', 'lugar', 'cupos']

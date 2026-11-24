@@ -10,17 +10,19 @@ Si mañana cambiamos SQLite por PostgreSQL u Oracle, solo cambia esta capa
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 
-from .models import Animal, SolicitudAdopcion, Voluntario
+from .models import Animal, Jornada, SolicitudAdopcion, Voluntario
 
 
 class AnimalRepository:
 
-    def obtener_todos(self, especie=None, estado=None):
+    def obtener_todos(self, especie=None, estado=None, tamano=None):
         consulta = Animal.objects.all()
         if especie:
             consulta = consulta.filter(especie=especie)
         if estado:
             consulta = consulta.filter(estado=estado)
+        if tamano:
+            consulta = consulta.filter(tamano=tamano)
         return list(consulta)
 
     def obtener_por_id(self, animal_id):
@@ -101,3 +103,9 @@ class SesionRepository:
 
     def eliminar_token(self, usuario):
         Token.objects.filter(user=usuario).delete()
+
+
+class JornadaRepository:
+
+    def proximas(self, desde):
+        return list(Jornada.objects.filter(fecha__gte=desde))

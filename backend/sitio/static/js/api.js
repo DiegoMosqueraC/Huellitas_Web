@@ -5,9 +5,8 @@
   de error que define el contrato de la API.
 */
 
-// Con Django la página y la API comparten origen. Si la página se abre con doble clic
-// (file://) o con Live Server (puerto 5500), la API sigue en el puerto 8000.
-const BASE_API = location.protocol === 'file:' || location.port === '5500' ? 'http://127.0.0.1:8000/api' : '/api';
+// Django sirve las páginas y la API en el mismo origen.
+const BASE_API = '/api';
 
 /* Sesión del administrador. Se guarda en sessionStorage (se borra al cerrar la
    pestaña) y no en localStorage, para que el token no quede guardado en el equipo. */
@@ -61,7 +60,7 @@ async function solicitar(metodo, ruta, cuerpo, { autenticado = false } = {}) {
   try {
     respuesta = await fetch(BASE_API + ruta, opciones);
   } catch {
-    throw new ErrorApi(0, 'SIN_CONEXION', 'No fue posible conectar con el servidor. Enciéndelo con "python manage.py runserver" en la carpeta backend y recarga la página.');
+    throw new ErrorApi(0, 'SIN_CONEXION', 'No fue posible conectar con el servidor. Intenta de nuevo en unos minutos.');
   }
 
   if (respuesta.status === 204) return null;
@@ -82,11 +81,9 @@ async function solicitar(metodo, ruta, cuerpo, { autenticado = false } = {}) {
 const ADMIN = { autenticado: true };
 
 const api = {
-  listarAnimales: (especie) =>
-    solicitar('GET', '/animales/' + (especie ? `?especie=${encodeURIComponent(especie)}` : '')),
-  obtenerAnimal: (id) => solicitar('GET', `/animales/${encodeURIComponent(id)}/`),
   registrarSolicitud: (datos) => solicitar('POST', '/solicitudes/', datos),
   registrarVoluntario: (datos) => solicitar('POST', '/voluntarios/', datos),
+  consultarSolicitud: (numero, documento) => solicitar('POST', '/solicitudes/consulta/', { numero, documento }),
 
   // Administración (requieren sesión de administrador).
   iniciarSesion: (usuario, clave) => solicitar('POST', '/sesion/', { usuario, clave }),

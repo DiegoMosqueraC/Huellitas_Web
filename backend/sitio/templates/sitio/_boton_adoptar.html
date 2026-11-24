@@ -1,0 +1,5 @@
+{% if animal.estado == 'DISPONIBLE' %}
+  <a class="boton" href="{% url 'sitio:adoptar' %}?animal={{ animal.id }}#solicitud">Quiero adoptar a {{ animal.nombre }}</a>
+{% else %}
+  <span class="etiqueta etiqueta--aviso">{{ animal.get_estado_display }}</span>
+{% endif %}

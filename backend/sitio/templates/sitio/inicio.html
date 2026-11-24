@@ -1,0 +1,96 @@
+{% extends 'sitio/base.html' %}
+{% load static %}
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+<section class="portada">
+  <div class="rastro" aria-hidden="true"><span style="--i:1; --par:1"></span><span style="--i:2; --par:0"></span><span style="--i:3; --par:1"></span><span style="--i:4; --par:0"></span><span style="--i:5; --par:1"></span><span style="--i:6; --par:0"></span><span style="--i:7; --par:1"></span></div>
+  <div class="portada__texto">
+    <h1>Un hogar para cada huellita de Cúcuta</h1>
+    <p class="portada__bajada">
+      Rescatamos perros y gatos abandonados, los cuidamos y les buscamos una familia responsable.
+      Conócelos y envía tu solicitud de adopción en línea.
+    </p>
+    <p class="portada__acciones">
+      <a class="boton" href="{% url 'sitio:animales' %}">Conocer a los animales</a>
+      <a class="boton boton--contorno" href="{% url 'sitio:voluntarios' %}">Quiero ser voluntario</a>
+    </p>
+    <p class="portada__dato">
+      {% if total_disponibles %}
+        Hoy {% if total_disponibles == 1 %}hay 1 animal esperando{% else %}hay {{ total_disponibles }} animales esperando{% endif %} un hogar.
+      {% else %}
+        Hoy todos nuestros animales tienen una familia en proceso. Vuelve pronto.
+      {% endif %}
+    </p>
+  </div>
+  <div class="portada__retratos">
+    {% for animal in retratos %}
+      <a class="retrato" href="{% url 'sitio:ficha' animal.id %}">
+        <img src="{% if animal.foto %}{% static animal.foto %}{% else %}{% static 'img/logo.svg' %}{% endif %}"
+             alt="{{ animal.foto_alt|default:animal.nombre }}" width="320" height="400">
+        <span class="placa">{{ animal.nombre }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="nosotros fondo-suave">
+  <div>
+    <h2>Quiénes somos</h2>
+    <p>
+      Somos una fundación sin ánimo de lucro de Cúcuta, Norte de Santander. Desde nuestro refugio
+      rescatamos animales abandonados o maltratados, les damos atención veterinaria, los esterilizamos
+      y los preparamos para encontrar una familia que los quiera para siempre.
+    </p>
+    <p>
+      Con esta página queremos que conocer a nuestros animales, solicitar una adopción o unirse como
+      voluntario sea <strong>fácil, ordenado y transparente</strong>, sin depender solo de mensajes por redes sociales.
+    </p>
+  </div>
+  <div>
+    <h3>Nuestro impacto en cifras</h3>
+    <ul class="cifras">
+      <li><strong>45</strong> animales bajo nuestro cuidado actualmente.</li>
+      <li><strong>320</strong> adopciones responsables realizadas.</li>
+      <li><strong>60</strong> voluntarios activos.</li>
+    </ul>
+    <p><small>Cifras de ejemplo para la demostración del proyecto.</small></p>
+  </div>
+</section>
+
+<section>
+  <h2>¿Cómo quieres ayudar?</h2>
+  <div class="caminos">
+    <a class="camino" href="{% url 'sitio:adoptar' %}">
+      <h3>Adopta</h3>
+      <p>Conoce los requisitos, el proceso en seis pasos y envía tu solicitud.</p>
+    </a>
+    <a class="camino" href="{% url 'sitio:voluntarios' %}">
+      <h3>Hazte voluntario</h3>
+      <p>Mira las próximas jornadas y regístrate con tus días disponibles.</p>
+    </a>
+    <a class="camino" href="{% url 'sitio:contacto' %}">
+      <h3>Dona o comparte</h3>
+      <p>Alimento, cobijas, medicamentos o simplemente difundir a nuestros animales.</p>
+    </a>
+  </div>
+  <p class="aviso-consulta">
+    ¿Ya enviaste una solicitud? <a href="{% url 'sitio:consulta' %}">Consulta en qué va</a> con tu número de solicitud y tu documento.
+  </p>
+</section>
+
+{% if proxima_jornada %}
+<section class="fondo-calido proxima">
+  <div>
+    <h2>Próxima jornada</h2>
+    <p class="proxima__dato">
+      <strong>{{ proxima_jornada.actividad }}</strong>:
+      <time datetime="{{ proxima_jornada.fecha|date:'Y-m-d' }}">{{ proxima_jornada.fecha|date:'l j \d\e F'|lower|capfirst }}</time>,
+      de {{ proxima_jornada.hora_inicio|time:'g:i a' }} a {{ proxima_jornada.hora_fin|time:'g:i a' }},
+      en {{ proxima_jornada.lugar }}.
+    </p>
+  </div>
+  <a class="boton" href="{% url 'sitio:voluntarios' %}">Ver todas las jornadas</a>
+</section>
+{% endif %}
+{% endblock %}

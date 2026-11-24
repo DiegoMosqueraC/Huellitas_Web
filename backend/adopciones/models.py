@@ -53,6 +53,13 @@ class Animal(models.Model):
     def __str__(self):
         return f'{self.nombre} ({self.get_especie_display()})'
 
+    @property
+    def edad_texto(self):
+        if self.edad_meses < 12:
+            return f'{self.edad_meses} {"mes" if self.edad_meses == 1 else "meses"}'
+        anios = self.edad_meses // 12
+        return f'{anios} {"año" if anios == 1 else "años"}'
+
 
 class SolicitudAdopcion(models.Model):
     class Estado(models.TextChoices):
@@ -172,3 +179,23 @@ class Voluntario(models.Model):
 
     def __str__(self):
         return f'{self.nombre} ({self.get_area_display()})'
+
+
+class Jornada(models.Model):
+    """Jornada de voluntariado del calendario público."""
+    fecha = models.DateField()
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    actividad = models.CharField(max_length=100)
+    lugar = models.CharField(max_length=150)
+    cupos = models.PositiveSmallIntegerField()
+
+    class Meta:
+        ordering = ['fecha', 'hora_inicio']
+        constraints = [
+            models.CheckConstraint(condition=Q(hora_fin__gt=models.F('hora_inicio')), name='jornada_horario_valido'),
+            models.CheckConstraint(condition=Q(cupos__gte=1), name='jornada_con_cupos'),
+        ]
+
+    def __str__(self):
+        return f'{self.actividad} ({self.fecha:%d/%m/%Y})'

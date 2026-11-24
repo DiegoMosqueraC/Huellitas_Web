@@ -13,7 +13,13 @@ from django.utils import timezone
 
 from .errores import Conflicto, CredencialesInvalidas, DatosInvalidos, RecursoNoEncontrado
 from .models import Animal, SolicitudAdopcion, Voluntario
-from .repositorios import AnimalRepository, SesionRepository, SolicitudRepository, VoluntarioRepository
+from .repositorios import (
+    AnimalRepository,
+    JornadaRepository,
+    SesionRepository,
+    SolicitudRepository,
+    VoluntarioRepository,
+)
 
 
 class AnimalService:
@@ -21,15 +27,18 @@ class AnimalService:
     def __init__(self, repositorio=None):
         self.repositorio = repositorio or AnimalRepository()
 
-    def listar(self, especie=None, estado=None):
+    def listar(self, especie=None, estado=None, tamano=None):
         errores = {}
-        if especie and especie not in Animal.Especie.values:
-            errores['especie'] = [f'Valores permitidos: {", ".join(Animal.Especie.values)}.']
-        if estado and estado not in Animal.Estado.values:
-            errores['estado'] = [f'Valores permitidos: {", ".join(Animal.Estado.values)}.']
+        for campo, valor, permitidos in (
+            ('especie', especie, Animal.Especie.values),
+            ('estado', estado, Animal.Estado.values),
+            ('tamano', tamano, Animal.Tamano.values),
+        ):
+            if valor and valor not in permitidos:
+                errores[campo] = [f'Valores permitidos: {", ".join(permitidos)}.']
         if errores:
             raise DatosInvalidos('Los filtros de la consulta no son válidos.', errores)
-        return self.repositorio.obtener_todos(especie=especie, estado=estado)
+        return self.repositorio.obtener_todos(especie=especie, estado=estado, tamano=tamano)
 
     def obtener(self, animal_id):
         animal = self.repositorio.obtener_por_id(animal_id)
@@ -71,6 +80,17 @@ class SolicitudService:
         solicitud = self.solicitudes.obtener_por_id(solicitud_id)
         if solicitud is None:
             raise RecursoNoEncontrado(f'No existe una solicitud con id {solicitud_id}.')
+        return solicitud
+
+    def consultar(self, numero, documento):
+        """
+        El solicitante consulta el estado de su solicitud con el número y su documento.
+        Si no coinciden los dos, la respuesta es la misma que si el número no existiera:
+        así nadie puede averiguar qué solicitudes existen probando números.
+        """
+        solicitud = self.solicitudes.obtener_por_id(numero)
+        if solicitud is None or solicitud.documento.upper() != documento.strip().upper():
+            raise RecursoNoEncontrado('No encontramos una solicitud con ese número y ese documento.')
         return solicitud
 
     # Flujo del proceso de adopción. APROBADA y RECHAZADA son estados finales.
@@ -251,3 +271,13 @@ class SesionService:
     def cerrar_sesion(self, cuenta):
         # Borrar el token lo invalida de inmediato, aunque alguien lo haya copiado.
         self.repositorio.eliminar_token(cuenta)
+
+
+class JornadaService:
+
+    def __init__(self, repositorio=None):
+        self.repositorio = repositorio or JornadaRepository()
+
+    def proximas(self):
+        # Solo se publican las jornadas de hoy en adelante.
+        return self.repositorio.proximas(timezone.localdate())

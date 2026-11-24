@@ -1,0 +1,39 @@
+{% extends 'sitio/base.html' %}
+{% load static %}
+{% block titulo %}{{ animal.nombre }}{% endblock %}
+{% block descripcion %}{{ animal.nombre }}: {{ animal.descripcion }}{% endblock %}
+
+{% block contenido %}
+<section>
+  <nav class="migas" aria-label="Ruta">
+    <a href="{% url 'sitio:inicio' %}">Inicio</a> /
+    <a href="{% url 'sitio:animales' %}">Animales</a> /
+    <span aria-current="page">{{ animal.nombre }}</span>
+  </nav>
+
+  <article class="detalle">
+    <figure>
+      <img src="{% if animal.foto %}{% static animal.foto %}{% else %}{% static 'img/logo.svg' %}{% endif %}"
+           alt="{{ animal.foto_alt|default:animal.nombre }}">
+      {% if animal.historia %}<figcaption>{{ animal.historia }}</figcaption>{% endif %}
+    </figure>
+    <div>
+      <h1 class="placa placa--grande">{{ animal.nombre }}</h1>
+      <p class="detalle__descripcion">{{ animal.descripcion }}</p>
+      <dl class="ficha">
+        <dt>Especie</dt><dd>{{ animal.get_especie_display }}</dd>
+        <dt>Raza</dt><dd>{{ animal.raza }}</dd>
+        <dt>Sexo</dt><dd>{{ animal.get_sexo_display }}</dd>
+        <dt>Edad</dt><dd>{{ animal.edad_texto }}</dd>
+        <dt>Tamaño</dt><dd>{{ animal.get_tamano_display }}</dd>
+        <dt>Salud</dt><dd>{{ animal.salud }}</dd>
+        <dt>Estado</dt><dd>{{ animal.get_estado_display }}</dd>
+      </dl>
+      <p class="tarjeta__acciones">
+        {% include 'sitio/_boton_adoptar.html' %}
+        <a href="{% url 'sitio:animales' %}">Ver todos los animales</a>
+      </p>
+    </div>
+  </article>
+</section>
+{% endblock %}

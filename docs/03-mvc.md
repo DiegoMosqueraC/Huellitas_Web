@@ -1,5 +1,8 @@
 # 3. Modelo – Vista – Controlador (MVC)
 
+> **Actualización (entrega 4, 23/11/2026):** el sitio dejó de ser una sola página. Las páginas ahora son plantillas de Django en `backend/sitio/templates/sitio/` y las direcciones son `/`, `/animales/`, `/adoptar/`, `/voluntarios/`, `/mi-solicitud/`, `/contacto/` y `/panel/`. Este documento conserva la actividad tal como se entregó; la estructura actual está en [07-sitio-django.md](07-sitio-django.md).
+
+
 Producto del equipo de la clase MVC: modelos principales, vistas, controladores, flujo de una funcionalidad y diagrama MVC.
 
 ## 3.1 Modelos principales (`backend/adopciones/models.py`)

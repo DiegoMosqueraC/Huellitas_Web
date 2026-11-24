@@ -1,0 +1,38 @@
+{% extends 'sitio/base.html' %}
+{% block titulo %}Contacto{% endblock %}
+
+{% block contenido %}
+<section class="cabecera">
+  <h1>Contacto y ubicación</h1>
+  <p>Visítanos o escríbenos. Con gusto resolvemos tus dudas sobre adopción, voluntariado o donaciones.</p>
+</section>
+
+<section>
+  <div class="contacto__rejilla">
+    <address class="panel">
+      <strong>Fundación Huellitas de Esperanza (ejemplo)</strong><br>
+      Dirección: Calle 00 # 00-00, barrio de ejemplo, Cúcuta, Norte de Santander<br>
+      Celular: <a href="tel:+573000000000">300 000 0000</a><br>
+      Correo: <a href="mailto:adopciones@huellitas.example.org">adopciones@huellitas.example.org</a>
+    </address>
+
+    <div class="panel">
+      <h2>Horario de atención</h2>
+      <ul>
+        <li>Lunes a viernes: 8:00 a. m. – 4:00 p. m.</li>
+        <li>Sábados: 8:00 a. m. – 12:00 m.</li>
+        <li>Domingos y festivos: solo jornadas programadas.</li>
+      </ul>
+    </div>
+
+    <aside class="panel">
+      <h2>Otras formas de ayudar</h2>
+      <p>Si no puedes adoptar, puedes donar alimento, cobijas o medicamentos en nuestra sede, o compartir nuestras publicaciones.</p>
+      <p>
+        Más información sobre tenencia responsable:
+        <a href="https://www.minambiente.gov.co" target="_blank" rel="noopener noreferrer">Ministerio de Ambiente y Desarrollo Sostenible</a>.
+      </p>
+    </aside>
+  </div>
+</section>
+{% endblock %}

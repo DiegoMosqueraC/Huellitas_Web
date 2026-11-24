@@ -1,0 +1,124 @@
+{% extends 'sitio/base.html' %}
+{% load static %}
+{% block titulo %}Voluntarios{% endblock %}
+{% block scripts %}
+  <script defer src="{% static 'js/api.js' %}"></script>
+  <script defer src="{% static 'js/componentes.js' %}"></script>
+  <script defer src="{% static 'js/formularios.js' %}"></script>
+  <script defer src="{% static 'js/voluntarios.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+<section class="cabecera">
+  <h1>Voluntarios</h1>
+  <p>El refugio funciona gracias a personas que donan su tiempo. No necesitas experiencia: te capacitamos en cada actividad.</p>
+</section>
+
+<section class="fondo-calido">
+  <h2>Próximas jornadas</h2>
+  {% if jornadas %}
+    <div class="tabla-desplazable">
+      <table>
+        <caption>Calendario de jornadas de voluntariado (datos de ejemplo)</caption>
+        <thead>
+          <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Horario</th>
+            <th scope="col">Actividad</th>
+            <th scope="col">Lugar</th>
+            <th scope="col">Cupos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for jornada in jornadas %}
+            <tr>
+              <td><time datetime="{{ jornada.fecha|date:'Y-m-d' }}">{{ jornada.fecha|date:'l j \d\e F'|lower|capfirst }}</time></td>
+              <td>{{ jornada.hora_inicio|time:'g:i a' }} – {{ jornada.hora_fin|time:'g:i a' }}</td>
+              <td>{{ jornada.actividad }}</td>
+              <td>{{ jornada.lugar }}</td>
+              <td>{{ jornada.cupos }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="mensaje mensaje--aviso">Por ahora no hay jornadas programadas. Regístrate abajo y te avisaremos cuando abramos la próxima.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Regístrate como voluntario</h2>
+  {# js/voluntarios.js envía este formulario como JSON a POST /api/voluntarios/ #}
+  <form id="form-voluntario" action="/api/voluntarios/" method="post">
+    <fieldset>
+      <legend>Datos del voluntario</legend>
+      <p>
+        <label for="vol-nombre">Nombre completo *</label><br>
+        <input type="text" id="vol-nombre" name="nombre" required minlength="3" maxlength="100">
+      </p>
+      <p>
+        <label for="vol-correo">Correo electrónico *</label><br>
+        <input type="email" id="vol-correo" name="correo" required>
+      </p>
+      <p>
+        <label for="vol-tel">Celular *</label><br>
+        <input type="tel" id="vol-tel" name="telefono" required pattern="3[0-9]{9}" title="Número celular de 10 dígitos que empieza por 3">
+      </p>
+      <p>
+        <label for="vol-edad">Edad *</label><br>
+        <input type="number" id="vol-edad" name="edad" required min="16" max="90">
+      </p>
+      <p>
+        <label for="vol-red">Perfil de red social o portafolio (opcional)</label><br>
+        <input type="url" id="vol-red" name="red_social" placeholder="https://">
+      </p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Disponibilidad y habilidades</legend>
+      <p>Días disponibles *</p>
+      <p>
+        <input type="checkbox" id="dia-lv" name="disponibilidad" value="entre-semana">
+        <label for="dia-lv">Lunes a viernes</label><br>
+        <input type="checkbox" id="dia-sab" name="disponibilidad" value="sabado">
+        <label for="dia-sab">Sábados</label><br>
+        <input type="checkbox" id="dia-dom" name="disponibilidad" value="domingo">
+        <label for="dia-dom">Domingos y festivos</label>
+      </p>
+      <p>
+        <label for="vol-area">Área en la que te gustaría ayudar *</label><br>
+        <select id="vol-area" name="area" required>
+          <option value="">Selecciona un área</option>
+          <option value="cuidado">Cuidado y paseo de animales</option>
+          <option value="eventos">Eventos y ferias de adopción</option>
+          <option value="transporte">Transporte de animales</option>
+          <option value="comunicaciones">Fotografía y redes sociales</option>
+          <option value="hogar-paso">Hogar de paso temporal</option>
+        </select>
+      </p>
+      <p>¿Tienes experiencia previa con animales? *</p>
+      <p>
+        <input type="radio" id="exp-si" name="experiencia" value="si" required>
+        <label for="exp-si">Sí</label><br>
+        <input type="radio" id="exp-no" name="experiencia" value="no">
+        <label for="exp-no">No</label>
+      </p>
+      <p>
+        <label for="vol-comentarios">Cuéntanos qué te motiva a ser voluntario</label><br>
+        <textarea id="vol-comentarios" name="comentarios" rows="4" cols="50" maxlength="500"></textarea>
+      </p>
+      <p>
+        <input type="checkbox" id="vol-datos" name="acepta_datos" required>
+        <label for="vol-datos">Autorizo el tratamiento de mis datos personales solo para coordinar actividades de voluntariado. *</label>
+      </p>
+    </fieldset>
+
+    <p>
+      <button type="submit">Quiero ser voluntario</button>
+    </p>
+  </form>
+
+  <div id="resultado-voluntario" role="status" aria-live="polite"></div>
+</section>
+{% endblock %}

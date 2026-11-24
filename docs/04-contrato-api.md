@@ -245,7 +245,7 @@ stateDiagram-v2
 
 ## 4.2.3 Sesión del personal: `POST` y `DELETE /api/sesion/`
 
-Lo usa la pantalla de administración (`refugio-html5/admin.html`).
+Lo usa el panel del personal (`/panel/`).
 
 **Iniciar sesión**
 
@@ -279,6 +279,27 @@ Un usuario sin rol de administrador puede iniciar sesión (`es_administrador: fa
 
 **Los botones salen del servidor.** Cada solicitud y cada voluntario trae `estados_siguientes`, por ejemplo `["EN_REVISION", "RECHAZADA"]`, calculado con `SolicitudService.TRANSICIONES`. La pantalla dibuja solo esos botones y no repite la regla. Si la fundación cambia el proceso, se modifica el servicio y la pantalla se adapta sola.
 
+## 4.2.4 Entrega 4: consulta de solicitud, jornadas y filtro por tamaño
+
+**`POST /api/solicitudes/consulta/`** (público). El solicitante ve en qué va su proceso.
+
+```json
+{ "numero": 8, "documento": "55443322" }
+```
+
+| Caso | Respuesta |
+|---|---|
+| Número y documento coinciden | 200 con `id`, `estado`, `estado_texto`, `animal`, `observacion`, `fecha_creacion`, `fecha_actualizacion` |
+| El número no existe **o** el documento no coincide | 404 `RECURSO_NO_ENCONTRADO`, con **el mismo mensaje** en ambos casos |
+| Faltan campos o el formato es inválido | 400 `DATOS_INVALIDOS` |
+| Más de 10 consultas por minuto desde la misma IP | 429 `DEMASIADOS_INTENTOS` |
+
+Decisiones de seguridad: es **POST** y no GET para que el documento no quede en la dirección, el historial ni los registros del servidor; la respuesta **no incluye datos personales** (nombre, documento, correo, teléfono, dirección); el mismo mensaje para "no existe" y "no es tuyo" impide averiguar qué solicitudes existen; y el límite de intentos impide probar documentos al azar. La regla vive en `SolicitudService.consultar`.
+
+**`GET /api/jornadas/`** (público). Devuelve las jornadas de voluntariado de hoy en adelante, ordenadas por fecha y hora (`JornadaService.proximas`). El modelo `Jornada` tiene restricciones en la base de datos: la hora de fin debe ser posterior a la de inicio y debe haber al menos un cupo.
+
+**`GET /api/animales/?tamano=pequeno|mediano|grande`**: nuevo filtro, combinable con `especie` y `estado`. Un valor desconocido responde 400 con el detalle en `tamano`.
+
 ## 4.3 Formato único de error
 
 Todos los errores de la API, incluidos los del framework y los 500, tienen la misma forma (`backend/adopciones/errores.py`):
@@ -310,7 +331,7 @@ Los datos se validan en tres niveles:
 
 | Nivel | Qué controla | Dónde |
 |---|---|---|
-| Frontend | Campos obligatorios, formatos y rangos visibles | Atributos HTML5 de `index.html` |
+| Frontend | Campos obligatorios, formatos y rangos visibles | Atributos HTML5 de las plantillas (`adoptar.html`, `voluntarios.html`) |
 | Backend | Formato (serializers) y reglas del negocio (servicios) | `serializers.py`, `servicios.py` |
 | Base de datos | PK, FK, NOT NULL, CHECK y UNIQUE | `models.py`, migración `0005_restricciones_de_integridad` |
 

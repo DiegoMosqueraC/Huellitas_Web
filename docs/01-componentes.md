@@ -1,5 +1,8 @@
 # 1. Componentes: inventario, repeticiones y propuesta
 
+> **Actualización (entrega 4, 23/11/2026):** el sitio dejó de ser una sola página. Las páginas ahora son plantillas de Django en `backend/sitio/templates/sitio/` y las direcciones son `/`, `/animales/`, `/adoptar/`, `/voluntarios/`, `/mi-solicitud/`, `/contacto/` y `/panel/`. Este documento conserva la actividad tal como se entregó; la estructura actual está en [07-sitio-django.md](07-sitio-django.md).
+
+
 Actividades de la clase 4 (Componentes): inventario de la aplicación, búsqueda de repeticiones y diagrama de componentes.
 
 ## 1.1 Inventario de la aplicación

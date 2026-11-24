@@ -1,7 +1,7 @@
 Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
-Found 53 test(s).
+Found 64 test(s).
 Operations to perform:
-  Synchronize unmigrated apps: corsheaders, messages, rest_framework, staticfiles
+  Synchronize unmigrated apps: messages, rest_framework, sitio, staticfiles
   Apply all migrations: admin, adopciones, auth, authtoken, contenttypes, sessions
 Synchronizing apps without migrations:
   Creating tables...
@@ -17,6 +17,8 @@ Running migrations:
   Applying adopciones.0003_voluntario... OK
   Applying adopciones.0004_cambio_de_estado... OK
   Applying adopciones.0005_restricciones_de_integridad... OK
+  Applying adopciones.0006_jornada... OK
+  Applying adopciones.0007_jornadas_iniciales... OK
   Applying contenttypes.0002_remove_content_type_name... OK
   Applying auth.0002_alter_permission_name_max_length... OK
   Applying auth.0003_alter_user_email_max_length... OK
@@ -77,6 +79,16 @@ test_T41_activar_voluntario (adopciones.tests.CambioDeEstadoApiTests)
 T41 Voluntario PENDIENTE -> ACTIVO (200); ACTIVO -> PENDIENTE (409). ... ok
 test_T42_admin_de_django_usa_el_mismo_servicio (adopciones.tests.CambioDeEstadoApiTests)
 T42 La acción "Aprobar" del panel /admin/ respeta las mismas reglas que la API. ... ok
+test_T54_filtrar_por_tamano (adopciones.tests.Entrega4ApiTests)
+T54 GET /api/animales/?tamano=pequeno -> 200 solo pequeños; tamaño inexistente -> 400. ... ok
+test_T55_proximas_jornadas (adopciones.tests.Entrega4ApiTests)
+T55 GET /api/jornadas/ -> 200 solo jornadas de hoy en adelante, en orden de fecha. ... ok
+test_T56_consultar_solicitud (adopciones.tests.Entrega4ApiTests)
+T56 POST /api/solicitudes/consulta/ con número y documento -> 200 con el estado, sin datos personales. ... ok
+test_T57_consulta_no_revela_solicitudes_ajenas (adopciones.tests.Entrega4ApiTests)
+T57 Documento equivocado o número inexistente -> 404 con el mismo mensaje; campos faltantes -> 400. ... ok
+test_T58_limite_de_consultas (adopciones.tests.Entrega4ApiTests)
+T58 Más de 10 consultas por minuto desde la misma IP -> 429 DEMASIADOS_INTENTOS. ... ok
 test_T49_base_de_datos_no_disponible (adopciones.tests.PersistenciaEIntegridadTests)
 T49 Si la base de datos no responde -> 503 SERVICIO_NO_DISPONIBLE con Retry-After, sin detalles internos. ... ok
 test_T50_la_aprobacion_es_atomica (adopciones.tests.PersistenciaEIntegridadTests)
@@ -139,9 +151,21 @@ test_T31_consultar_voluntarios_requiere_admin (adopciones.tests.VoluntariosApiTe
 T31 GET /api/voluntarios/: sin token 401, voluntario 403, administrador 200. ... ok
 test_T32_voluntario_inexistente (adopciones.tests.VoluntariosApiTests)
 T32 GET /api/voluntarios/999/ como administrador -> 404. ... ok
+test_P01_todas_las_paginas_responden (sitio.tests.PaginasTests)
+P01 Las páginas del mapa del sitio responden 200 y marcan su sección en el menú. ... ok
+test_P02_inicio_con_datos_reales (sitio.tests.PaginasTests)
+P02 Inicio muestra cuántos animales están disponibles y tres retratos. ... ok
+test_P03_catalogo_y_filtros (sitio.tests.PaginasTests)
+P03 /animales/ lista los 6 animales; ?especie=gato solo gatos; ?tamano=grande solo Zeus; filtro inválido avisa. ... ok
+test_P04_ficha_de_un_animal (sitio.tests.PaginasTests)
+P04 /animales/1/ muestra la ficha de Luna; /animales/999/ responde 404 con la página propia. ... ok
+test_P05_adoptar_preselecciona_el_animal (sitio.tests.PaginasTests)
+P05 /adoptar/?animal=3 deja elegida a Canela; Zeus (en proceso) aparece deshabilitado. ... ok
+test_P06_jornadas_desde_la_base_de_datos (sitio.tests.PaginasTests)
+P06 /voluntarios/ muestra las jornadas futuras y oculta las pasadas; sin jornadas, un aviso. ... ok
 
 ----------------------------------------------------------------------
-Ran 53 tests in 88.637s
+Ran 64 tests in 55.317s
 
 OK
 Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...

@@ -1,0 +1,92 @@
+{% extends 'sitio/base.html' %}
+{% block titulo %}Animales en adopción{% endblock %}
+
+{% block contenido %}
+<section class="cabecera">
+  <h1>Animales en adopción</h1>
+  <p>Cada uno de ellos llega vacunado, desparasitado y esterilizado. Conócelos y elige a tu nuevo compañero.</p>
+</section>
+
+<section>
+  {% if aviso %}<p class="mensaje mensaje--aviso">{{ aviso }}</p>{% endif %}
+
+  {# Los filtros son enlaces (GET): la página filtrada tiene su propia dirección y se puede compartir. #}
+  <div class="filtros-grupo">
+    <nav class="filtros" aria-label="Filtrar por especie">
+      <a href="?{% if tamano %}tamano={{ tamano }}{% endif %}" {% if not especie %}aria-current="true"{% endif %}>Todos</a>
+      {% for valor, texto in especies %}
+        <a href="?especie={{ valor }}{% if tamano %}&amp;tamano={{ tamano }}{% endif %}" {% if especie == valor %}aria-current="true"{% endif %}>{{ texto }}s</a>
+      {% endfor %}
+    </nav>
+    <nav class="filtros" aria-label="Filtrar por tamaño">
+      <a href="?{% if especie %}especie={{ especie }}{% endif %}" {% if not tamano %}aria-current="true"{% endif %}>Cualquier tamaño</a>
+      {% for valor, texto in tamanos %}
+        <a href="?tamano={{ valor }}{% if especie %}&amp;especie={{ especie }}{% endif %}" {% if tamano == valor %}aria-current="true"{% endif %}>{{ texto }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+
+  <p class="conteo">
+    {% if animales %}
+      {{ animales|length }} animal{{ animales|length|pluralize:"es" }}, {{ disponibles }} disponible{{ disponibles|pluralize }} para adopción.
+    {% endif %}
+  </p>
+
+  <div class="rejilla-animales">
+    {% for animal in animales %}
+      {% include 'sitio/_tarjeta_animal.html' %}
+    {% empty %}
+      <p class="mensaje mensaje--aviso">No hay animales con ese filtro. <a href="{% url 'sitio:animales' %}">Ver todos</a>.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="fondo-suave">
+  <h2>Resumen</h2>
+  <details class="glosario">
+    <summary>¿Qué significa raza definida, criollo o mestizo?</summary>
+    <dl>
+      <dt>Raza definida</dt>
+      <dd>El animal tiene las características de una raza reconocida, por ejemplo labrador retriever o beagle.</dd>
+      <dt>Criollo</dt>
+      <dd>El animal no tiene una raza definida y no se le reconocen rasgos de una raza en particular.</dd>
+      <dt>Mestizo</dt>
+      <dd>El animal no tiene una raza definida, pero proviene del cruce de razas y conserva rasgos de alguna de ellas.</dd>
+    </dl>
+  </details>
+  <div class="tabla-desplazable">
+    <table>
+      <caption>Animales publicados (datos de ejemplo)</caption>
+      <thead>
+        <tr>
+          <th scope="col">Nombre</th>
+          <th scope="col">Especie</th>
+          <th scope="col">Raza</th>
+          <th scope="col">Sexo</th>
+          <th scope="col">Edad</th>
+          <th scope="col">Tamaño</th>
+          <th scope="col">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for animal in animales %}
+          <tr>
+            <td><a href="{% url 'sitio:ficha' animal.id %}">{{ animal.nombre }}</a></td>
+            <td>{{ animal.get_especie_display }}</td>
+            <td>{{ animal.raza }}</td>
+            <td>{{ animal.get_sexo_display }}</td>
+            <td>{{ animal.edad_texto }}</td>
+            <td>{{ animal.get_tamano_display }}</td>
+            <td>{{ animal.get_estado_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">No hay animales con ese filtro.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="7">Total: {{ animales|length }} publicado{{ animales|length|pluralize }}, {{ disponibles }} disponible{{ disponibles|pluralize }}.</td></tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+{% endblock %}

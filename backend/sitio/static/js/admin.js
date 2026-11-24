@@ -1,5 +1,5 @@
 /*
-  Controlador del panel de administración (admin.html).
+  Controlador del panel del personal (/panel/).
   - Inicia y cierra sesión con /api/sesion/.
   - Lista solicitudes y voluntarios, y cambia su estado con PATCH.
   Los botones de cada fila salen de "estados_siguientes", que calcula el servidor,
@@ -139,7 +139,7 @@
           crear('td', {}, String(s.id)),
           crear('td', {}, fecha(s.fecha_creacion)),
           crear('td', {}, s.nombre, crear('br'), crear('small', {}, `${s.tipo_documento} ${s.documento}`)),
-          crear('td', {}, s.animal ? crear('a', { href: `animal.html?id=${s.animal.id}` }, s.animal.nombre) : 'Sin preferencia'),
+          crear('td', {}, s.animal ? crear('a', { href: `/animales/${s.animal.id}/` }, s.animal.nombre) : 'Sin preferencia'),
           crear('td', {}, etiquetaEstado(s)),
           crear('td', { clase: 'celda-acciones' },
             crear('button', { type: 'button', clase: 'accion accion--neutra', 'data-tipo': 'ver', 'data-id': s.id }, 'Ver'),

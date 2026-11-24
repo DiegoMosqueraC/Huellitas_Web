@@ -23,10 +23,6 @@ mimetypes.add_type('image/svg+xml', '.svg', True)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Carpeta del frontend (HTML + CSS + JS). Django la sirve en desarrollo para
-# que la página y la API compartan origen: http://127.0.0.1:8000/
-FRONTEND_DIR = BASE_DIR.parent / 'refugio-html5'
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -52,13 +48,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'corsheaders',
     'adopciones',
+    'sitio',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -158,16 +153,7 @@ REST_FRAMEWORK = {
     # Límite de intentos de inicio de sesión por dirección IP (contra adivinar contraseñas).
     'DEFAULT_THROTTLE_RATES': {
         'inicio_sesion': '10/minute',
+        # Consultar una solicitud pide número y documento: se limita para impedir probar documentos al azar.
+        'consulta_solicitud': '10/minute',
     },
 }
-
-# Permite consumir la API desde Live Server de VS Code (puerto 5500) y, en
-# desarrollo, desde la página abierta con doble clic (file://), que el navegador
-# identifica con el origen "null". Las operaciones de administración siguen
-# exigiendo el token Bearer, así que este origen no da permisos adicionales.
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:5500',
-    'http://localhost:5500',
-]
-if DEBUG:
-    CORS_ALLOWED_ORIGINS.append('null')

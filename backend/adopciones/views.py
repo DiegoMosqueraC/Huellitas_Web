@@ -20,6 +20,9 @@ from rest_framework.views import APIView
 from .errores import RecursoNoEncontrado
 from .permisos import EnvioPublicoConsultaAdmin, LecturaPublicaEscrituraAdmin
 from .serializers import (
+    ConsultaSolicitudSerializer,
+    JornadaSerializer,
+    SolicitudEstadoSerializer,
     AnimalSerializer,
     InicioSesionSerializer,
     SolicitudCambioEstadoSerializer,
@@ -31,7 +34,7 @@ from .serializers import (
     VoluntarioEntradaSerializer,
     VoluntarioRegistradoSerializer,
 )
-from .servicios import AnimalService, SesionService, SolicitudService, VoluntarioService
+from .servicios import AnimalService, JornadaService, SesionService, SolicitudService, VoluntarioService
 
 
 class AnimalesController(APIView):
@@ -43,6 +46,7 @@ class AnimalesController(APIView):
         animales = self.servicio.listar(
             especie=request.query_params.get('especie'),
             estado=request.query_params.get('estado'),
+            tamano=request.query_params.get('tamano'),
         )
         return Response(AnimalSerializer(animales, many=True).data)
 
@@ -150,6 +154,32 @@ class VoluntarioDetalleController(APIView):
         entrada.is_valid(raise_exception=True)
         voluntario = self.servicio.cambiar_estado(id, entrada.validated_data['estado'])
         return Response(VoluntarioDetalleSerializer(voluntario).data)
+
+
+class ConsultaSolicitudController(APIView):
+    """
+    POST /api/solicitudes/consulta/ (público): estado de una solicitud con su número y documento.
+    Es POST y no GET para que el documento no quede en la URL, el historial ni los registros del servidor.
+    """
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'consulta_solicitud'
+    servicio = SolicitudService()
+
+    def post(self, request):
+        entrada = ConsultaSolicitudSerializer(data=request.data)
+        entrada.is_valid(raise_exception=True)
+        solicitud = self.servicio.consultar(**entrada.validated_data)
+        return Response(SolicitudEstadoSerializer(solicitud).data)
+
+
+class JornadasController(APIView):
+    """GET /api/jornadas/ (público): próximas jornadas de voluntariado."""
+    permission_classes = [AllowAny]
+    servicio = JornadaService()
+
+    def get(self, request):
+        return Response(JornadaSerializer(self.servicio.proximas(), many=True).data)
 
 
 class SesionController(APIView):

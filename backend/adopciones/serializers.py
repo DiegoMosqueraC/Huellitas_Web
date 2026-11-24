@@ -8,12 +8,12 @@ Las reglas del negocio NO van aquí: van en servicios.py.
 """
 from rest_framework import serializers
 
-from .models import Animal, SolicitudAdopcion, Voluntario
+from .models import Animal, Jornada, SolicitudAdopcion, Voluntario
 from .servicios import SolicitudService, VoluntarioService
 
 
 class AnimalSerializer(serializers.ModelSerializer):
-    edad_texto = serializers.SerializerMethodField()
+    edad_texto = serializers.CharField(read_only=True)
     especie_texto = serializers.CharField(source='get_especie_display', read_only=True)
     sexo_texto = serializers.CharField(source='get_sexo_display', read_only=True)
     tamano_texto = serializers.CharField(source='get_tamano_display', read_only=True)
@@ -32,12 +32,6 @@ class AnimalSerializer(serializers.ModelSerializer):
             'edad_meses': {'max_value': 360},
         }
 
-    def get_edad_texto(self, animal):
-        meses = animal.edad_meses
-        if meses < 12:
-            return f'{meses} {"mes" if meses == 1 else "meses"}'
-        anios = meses // 12
-        return f'{anios} {"año" if anios == 1 else "años"}'
 
 
 class SolicitudEntradaSerializer(serializers.Serializer):
@@ -172,3 +166,26 @@ class VoluntarioCambioEstadoSerializer(serializers.Serializer):
 class InicioSesionSerializer(serializers.Serializer):
     usuario = serializers.CharField(max_length=150)
     clave = serializers.CharField(max_length=128, trim_whitespace=False)
+
+
+class ConsultaSolicitudSerializer(serializers.Serializer):
+    numero = serializers.IntegerField(min_value=1)
+    documento = serializers.RegexField(
+        r'^[0-9A-Za-z]{5,15}$', error_messages={'invalid': 'Entre 5 y 15 caracteres, solo letras y números.'}
+    )
+
+
+class SolicitudEstadoSerializer(serializers.ModelSerializer):
+    """Lo que ve el solicitante: el estado de su proceso, sin sus datos personales."""
+    animal = AnimalResumenSerializer(read_only=True)
+    estado_texto = serializers.CharField(source='get_estado_display', read_only=True)
+
+    class Meta:
+        model = SolicitudAdopcion
+        fields = ['id', 'estado', 'estado_texto', 'animal', 'observacion', 'fecha_creacion', 'fecha_actualizacion']
+
+
+class JornadaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Jornada
+        fields = ['id', 'fecha', 'hora_inicio', 'hora_fin', 'actividad', 'lugar', 'cupos']

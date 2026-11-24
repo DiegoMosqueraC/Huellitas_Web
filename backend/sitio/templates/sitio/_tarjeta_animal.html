@@ -1,0 +1,20 @@
+{% load static %}
+<article class="tarjeta" id="animal-{{ animal.id }}">
+  <img class="tarjeta__foto" src="{% if animal.foto %}{% static animal.foto %}{% else %}{% static 'img/logo.svg' %}{% endif %}"
+       alt="{{ animal.foto_alt|default:animal.nombre }}" loading="lazy" width="400" height="300">
+  <div class="tarjeta__cuerpo">
+    <h3 class="placa">{{ animal.nombre }}</h3>
+    <ul class="rasgos" aria-label="Datos de {{ animal.nombre }}">
+      <li>{{ animal.get_especie_display }}</li>
+      <li>{{ animal.get_sexo_display }}</li>
+      <li>{{ animal.edad_texto }}</li>
+      <li>{{ animal.get_tamano_display }}</li>
+    </ul>
+    <p class="tarjeta__raza">{{ animal.raza }}</p>
+    <p>{{ animal.descripcion }}</p>
+    <p class="tarjeta__acciones">
+      {% include 'sitio/_boton_adoptar.html' %}
+      <a href="{% url 'sitio:ficha' animal.id %}">Ver la ficha de {{ animal.nombre }}</a>
+    </p>
+  </div>
+</article>

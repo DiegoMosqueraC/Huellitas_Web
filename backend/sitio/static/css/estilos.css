@@ -110,20 +110,12 @@ small {
   color: var(--tinta-suave);
 }
 
-/* ---------- Componente: encabezado ---------- */
+/* ---------- Encabezado (plantilla base.html) ---------- */
 
-hh-encabezado,
-hh-pie {
-  display: block;
-}
-
-hh-encabezado {
+.encabezado {
   position: sticky;
   top: 0;
   z-index: 10;
-}
-
-.encabezado {
   background: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid var(--borde);
 }
@@ -174,6 +166,12 @@ hh-encabezado {
   color: var(--verde-oscuro);
 }
 
+/* Página en la que está el visitante. */
+.menu a[aria-current="page"] {
+  background: var(--verde-oscuro);
+  color: #fff;
+}
+
 /* ---------- Secciones ---------- */
 
 /* Cada sección ocupa todo el ancho (para poder tener fondo propio) y su
@@ -187,13 +185,32 @@ main > section > p {
   max-width: 68ch;
 }
 
-#nosotros,
-#como-adoptar {
+.fondo-suave {
   background: var(--fondo-suave);
 }
 
-#voluntarios {
+.fondo-calido {
   background: var(--placa-claro);
+}
+
+/* Cabecera de las páginas interiores: título y una frase de contexto. */
+main > .cabecera {
+  padding-bottom: 0;
+}
+
+.cabecera h1 {
+  margin-bottom: 0.5rem;
+}
+
+.cabecera > p {
+  font-size: 1.15rem;
+  color: var(--tinta-suave);
+}
+
+.migas {
+  margin-bottom: 1.25rem;
+  color: var(--tinta-suave);
+  font-size: 0.95rem;
 }
 
 /* ---------- La placa (sello del sitio) ---------- */
@@ -448,6 +465,139 @@ button:disabled {
   background: var(--verde-oscuro);
   border-color: var(--verde-oscuro);
   color: #fff;
+}
+
+/* Filtros del catálogo: son enlaces, así cada filtro tiene su propia dirección. */
+.filtros-grupo .filtros {
+  margin: 0 0 0.75rem;
+}
+
+.filtros-grupo {
+  margin: 0 0 1rem;
+}
+
+.filtros a {
+  border: 2px solid var(--verde);
+  border-radius: 999px;
+  padding: 0.3rem 1rem;
+  background: #fff;
+  color: var(--verde-oscuro);
+  font-family: var(--fuente-titulos);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.filtros a:hover {
+  background: var(--verde-claro);
+}
+
+.filtros a[aria-current="true"] {
+  background: var(--verde-oscuro);
+  border-color: var(--verde-oscuro);
+  color: #fff;
+}
+
+.conteo {
+  margin: 0 0 1.25rem;
+  font-weight: 700;
+  color: var(--verde-oscuro);
+}
+
+/* ---------- Inicio: caminos para ayudar y próxima jornada ---------- */
+
+.caminos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.camino {
+  display: block;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: #fff;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.camino:hover {
+  border-color: var(--verde);
+  background: var(--verde-claro);
+}
+
+.camino h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.camino p {
+  margin: 0;
+}
+
+.aviso-consulta {
+  margin-top: 1.75rem;
+}
+
+.proxima {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.proxima h2 {
+  margin-bottom: 0.25rem;
+}
+
+.proxima__dato {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* ---------- Mi solicitud ---------- */
+
+.consulta {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.form-consulta fieldset {
+  grid-template-columns: 1fr;
+}
+
+.resultado-consulta .mensaje {
+  margin-top: 0;
+}
+
+.tarjeta-estado {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: #fff;
+}
+
+.tarjeta-estado h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.estados {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  max-width: 50rem;
+}
+
+.estados dt,
+.estados dd {
+  margin: 0;
 }
 
 .rejilla-animales {
@@ -1107,11 +1257,35 @@ dialog form > p {
   outline-color: var(--placa);
 }
 
-.pie__enlaces {
+.pie__columnas {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
-  margin-top: 1.25rem;
+  gap: 1.5rem 4rem;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.pie__columnas > div {
+  flex: 1 1 22rem;
+}
+
+.pie__titulo {
+  margin: 0 0 0.5rem;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: #fff;
+}
+
+.pie__mapa {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: 2rem;
+}
+
+.pie__mapa li {
+  margin-bottom: 0.35rem;
 }
 
 /* ---------- Pantallas pequeñas ---------- */
@@ -1133,7 +1307,8 @@ dialog form > p {
 
   .portada,
   .nosotros,
-  .detalle {
+  .detalle,
+  .consulta {
     grid-template-columns: 1fr;
   }
 
@@ -1157,12 +1332,387 @@ dialog form > p {
   }
 }
 
+/* ==========================================================================
+   Diseño actual y animaciones (entrega 4).
+   Mismos colores de siempre; cambian la profundidad, las formas y el movimiento.
+   El momento principal es la portada: los retratos llegan uno a uno, las
+   placas se balancean como en un collar y unas huellitas cruzan el fondo.
+   Todo el movimiento se apaga si el visitante pidió reducirlo.
+   ========================================================================== */
+
+:root {
+  --sombra-verde: 0 1px 2px rgba(23, 70, 58, 0.06), 0 10px 28px -12px rgba(23, 70, 58, 0.28);
+  --sombra-alta: 0 2px 4px rgba(23, 70, 58, 0.06), 0 22px 44px -18px rgba(23, 70, 58, 0.38);
+  --suave: cubic-bezier(0.22, 1, 0.36, 1);
+  --rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Borde ondulado entre secciones (como una loma suave). */
+  --onda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 48' preserveAspectRatio='none'%3E%3Cpath d='M0 48V24C240 0 480 0 720 22s480 26 720 0v26z'/%3E%3C/svg%3E");
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--placa);
+  color: var(--tinta);
+}
+
+/* ---------- Encabezado de vidrio ---------- */
+
+.encabezado {
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+  border-bottom-color: transparent;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+.encabezado.con-sombra {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom-color: var(--borde);
+  box-shadow: 0 8px 24px -18px rgba(23, 70, 58, 0.45);
+}
+
+.marca img {
+  transition: transform 0.5s var(--rebote);
+}
+
+.marca:hover img {
+  transform: rotate(-10deg) scale(1.08);
+}
+
+.menu a {
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.menu a:hover {
+  transform: translateY(-1px);
+}
+
+.menu a[aria-current="page"] {
+  box-shadow: 0 6px 14px -8px rgba(23, 70, 58, 0.8);
+}
+
+/* ---------- Bordes ondulados entre secciones ---------- */
+
+main > .fondo-suave,
+main > .fondo-calido {
+  position: relative;
+}
+
+main > .fondo-suave::before,
+main > .fondo-calido::before,
+.pie::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% - 1px);
+  height: clamp(18px, 3vw, 40px);
+  background: inherit;
+  -webkit-mask: var(--onda) center / 100% 100% no-repeat;
+  mask: var(--onda) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+
+/* La onda del pie se monta sobre el final de la última sección. */
+.pie {
+  position: relative;
+}
+
+/* ---------- Portada ---------- */
+
+.portada {
+  position: relative;
+  overflow: hidden;
+  min-height: min(78vh, 44rem);
+}
+
+.portada h1 {
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.portada__texto,
+.portada__retratos {
+  position: relative;
+  z-index: 1;
+}
+
+.retrato img {
+  box-shadow: var(--sombra-alta);
+  transition: transform 0.5s var(--suave), box-shadow 0.5s var(--suave);
+}
+
+.retrato:hover img {
+  transform: translateY(-6px) rotate(-0.6deg);
+}
+
+.retrato:nth-child(2):hover img,
+.retrato:nth-child(3):hover img {
+  transform: translateY(-6px) rotate(0.8deg);
+}
+
+/* Las placas cuelgan del agujero: el giro sale de ahí. */
+.placa {
+  transform-origin: 0.95rem 50%;
+}
+
+.retrato:hover .placa,
+.tarjeta:hover .placa {
+  animation: balanceo 1.1s var(--suave);
+}
+
+@keyframes balanceo {
+  0% { transform: rotate(-2deg); }
+  25% { transform: rotate(7deg); }
+  50% { transform: rotate(-5deg); }
+  75% { transform: rotate(3deg); }
+  100% { transform: rotate(2deg); }
+}
+
+/* Rastro de huellitas que cruza la portada (decorativo). */
+.rastro {
+  position: absolute;
+  inset: auto 0 1.5rem 0;
+  height: 7rem;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rastro span {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--i) * 14% - 4%);
+  width: 1.6rem;
+  height: 1.6rem;
+  background: var(--coral);
+  opacity: 0.14;
+  -webkit-mask: var(--huella) center / contain no-repeat;
+  mask: var(--huella) center / contain no-repeat;
+  transform: translateY(calc(var(--par) * -2.2rem)) rotate(78deg);
+}
+
+/* Entrada de la portada: una sola secuencia al cargar. */
+.anima:not(.listo) .portada__texto > * {
+  animation: subir 0.8s var(--suave) both;
+}
+
+.anima:not(.listo) .portada__texto > :nth-child(2) { animation-delay: 0.12s; }
+.anima:not(.listo) .portada__texto > :nth-child(3) { animation-delay: 0.24s; }
+.anima:not(.listo) .portada__texto > :nth-child(4) { animation-delay: 0.36s; }
+
+.anima:not(.listo) .retrato {
+  animation: llegar 0.9s var(--rebote) both;
+  animation-delay: calc(0.25s + var(--n, 0) * 0.15s);
+}
+
+.anima:not(.listo) .retrato:nth-child(2) { --n: 1; }
+.anima:not(.listo) .retrato:nth-child(3) { --n: 2; }
+
+.anima:not(.listo) .retrato .placa {
+  animation: colgar 1.4s var(--suave) both;
+  animation-delay: calc(0.75s + var(--n, 0) * 0.15s);
+}
+
+.anima:not(.listo) .rastro span {
+  animation: pisar 0.5s ease-out both;
+  animation-delay: calc(0.6s + var(--i) * 0.22s);
+}
+
+@keyframes subir {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes llegar {
+  from { opacity: 0; transform: translateY(28px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes colgar {
+  0% { opacity: 0; transform: rotate(-28deg); }
+  30% { opacity: 1; transform: rotate(10deg); }
+  55% { transform: rotate(-7deg); }
+  78% { transform: rotate(2deg); }
+  100% { transform: rotate(-2deg); }
+}
+
+@keyframes pisar {
+  from { opacity: 0; scale: 1.6; }
+  to { opacity: 0.14; scale: 1; }
+}
+
+/* ---------- Botones con relieve ---------- */
+
+.boton,
+button[type="submit"],
+.boton--contorno,
+button[type="reset"],
+.boton-secundario,
+.filtros a,
+.filtros button {
+  transition: transform 0.2s var(--suave), box-shadow 0.2s var(--suave),
+    background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.boton,
+button[type="submit"] {
+  box-shadow: 0 8px 18px -10px rgba(180, 54, 78, 0.85);
+}
+
+.boton:hover,
+button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px -12px rgba(180, 54, 78, 0.9);
+}
+
+.boton--contorno {
+  box-shadow: none;
+}
+
+.boton--contorno:hover,
+button[type="reset"]:hover,
+.boton-secundario:hover,
+.filtros a:hover {
+  transform: translateY(-2px);
+}
+
+.boton:active,
+button:active:not(:disabled),
+.filtros a:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* ---------- Tarjetas ---------- */
+
+.tarjeta,
+.camino,
+.tarjeta-estado,
+.panel {
+  border-color: transparent;
+  box-shadow: var(--sombra-verde);
+}
+
+.tarjeta,
+.camino {
+  transition: transform 0.35s var(--suave), box-shadow 0.35s var(--suave), background-color 0.2s ease;
+}
+
+.tarjeta:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--sombra-alta);
+}
+
+.camino {
+  position: relative;
+  overflow: hidden;
+  padding-right: 3.5rem;
+}
+
+.camino:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  box-shadow: var(--sombra-alta);
+}
+
+/* Huella que se asoma en la esquina al pasar el puntero. */
+.camino::after {
+  content: "";
+  position: absolute;
+  right: 1rem;
+  top: 1.2rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  background: var(--coral);
+  -webkit-mask: var(--huella) center / contain no-repeat;
+  mask: var(--huella) center / contain no-repeat;
+  opacity: 0.25;
+  transform: rotate(20deg);
+  transition: transform 0.4s var(--rebote), opacity 0.3s ease;
+}
+
+.camino:hover::after {
+  opacity: 1;
+  transform: rotate(-8deg) scale(1.15);
+}
+
+.rasgos li {
+  transition: background-color 0.2s ease;
+}
+
+/* ---------- Formularios ---------- */
+
+input:not([type="checkbox"]):not([type="range"]),
+select,
+textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:not([type="checkbox"]):not([type="range"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 4px rgba(31, 111, 84, 0.18);
+  outline: none;
+}
+
+/* Respuesta a una acción: el mensaje aparece en lugar de saltar. */
+.mensaje {
+  animation: subir 0.4s var(--suave) both;
+}
+
+details {
+  transition: box-shadow 0.25s ease;
+}
+
+details[open] {
+  box-shadow: var(--sombra-verde);
+}
+
+/* ---------- Aparición al desplazarse ---------- */
+
+/* Tarjetas, pasos y cifras aparecen al llegar a ellos. El script quita la clase
+   "revelado" del juego cuando terminan, para no estorbar los efectos al pasar el puntero. */
+.anima :is(.rejilla-animales > *, .caminos > *, .cifras li, .requisitos li, .pasos li, .contacto__rejilla > *):not(.revelado) {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s var(--suave), transform 0.7s var(--suave);
+  transition-delay: calc(var(--orden, 0) * 80ms);
+}
+
+.anima :is(.rejilla-animales > *, .caminos > *, .cifras li, .requisitos li, .pasos li, .contacto__rejilla > *).visible:not(.revelado) {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Movimiento reducido ---------- */
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
-  .placa {
-    transition: none;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+}
+
+@media (max-width: 860px) {
+  .portada {
+    min-height: 0;
+  }
+
+  .rastro {
+    display: none;
   }
 }
