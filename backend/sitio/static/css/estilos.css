@@ -1402,6 +1402,11 @@ main > .fondo-calido {
   position: relative;
 }
 
+/* La cabecera de las páginas interiores no tenía espacio abajo: la onda de la sección siguiente tapaba su texto. */
+main > .cabecera {
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+}
+
 main > .fondo-suave::before,
 main > .fondo-calido::before,
 .pie::before {
@@ -1644,6 +1649,71 @@ button:active:not(:disabled),
 
 .rasgos li {
   transition: background-color 0.2s ease;
+}
+
+/* Enlace de acción que va solo (junto a un botón): acompaña sin competir con él. */
+.enlace-accion {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.2rem 0;
+  font-family: var(--fuente-titulos);
+  font-weight: 500;
+  color: var(--verde-oscuro);
+  text-decoration: underline 2px transparent;
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color 0.25s ease, color 0.2s ease;
+}
+
+.enlace-accion::before {
+  content: "";
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  background: var(--coral);
+  -webkit-mask: var(--huella) center / contain no-repeat;
+  mask: var(--huella) center / contain no-repeat;
+  transition: transform 0.35s var(--rebote);
+}
+
+.enlace-accion:hover {
+  color: var(--coral-fuerte);
+  text-decoration-color: currentColor;
+}
+
+.enlace-accion:hover::before {
+  transform: rotate(-15deg) scale(1.15);
+}
+
+/* Enlaces dentro de una frase: se distinguen sin romper la lectura. */
+main :is(p, li, td, dd, address, small) > a:not([class]) {
+  color: var(--verde);
+  font-weight: 700;
+  text-decoration: underline 2px rgba(226, 88, 107, 0.45);
+  text-underline-offset: 0.22em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+main :is(p, li, td, dd, address, small) > a:not([class]):hover {
+  color: var(--coral-fuerte);
+  text-decoration-color: currentColor;
+}
+
+/* Ruta de la ficha: Inicio / Animales / Nombre. */
+.migas a {
+  color: var(--tinta-suave);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.migas a:hover {
+  color: var(--coral-fuerte);
+}
+
+.migas [aria-current="page"] {
+  color: var(--verde-oscuro);
+  font-weight: 700;
 }
 
 /* ---------- Formularios ---------- */

@@ -14,7 +14,7 @@
     <p>{{ animal.descripcion }}</p>
     <p class="tarjeta__acciones">
       {% include 'sitio/_boton_adoptar.html' %}
-      <a href="{% url 'sitio:ficha' animal.id %}">Ver la ficha de {{ animal.nombre }}</a>
+      <a class="enlace-accion" href="{% url 'sitio:ficha' animal.id %}">Ver la ficha de {{ animal.nombre }}</a>
     </p>
   </div>
 </article>

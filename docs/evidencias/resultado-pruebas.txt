@@ -165,7 +165,7 @@ test_P06_jornadas_desde_la_base_de_datos (sitio.tests.PaginasTests)
 P06 /voluntarios/ muestra las jornadas futuras y oculta las pasadas; sin jornadas, un aviso. ... ok
 
 ----------------------------------------------------------------------
-Ran 64 tests in 55.317s
+Ran 64 tests in 55.366s
 
 OK
 Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
